@@ -17,4 +17,15 @@ public class MainActivity extends AppCompatActivity {
         mGameView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
         setContentView(mGameView);
     }
+
+    protected void onPause() {
+        super.onPause();
+        mGameView.pause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mGameView.resume();
+    }
 }

@@ -3,6 +3,8 @@ package com.chumaribelle.quantumcargame;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -35,6 +37,8 @@ public class GameView extends SurfaceView implements Runnable{
 
     public void init(Context context) {
         mContext = context;
+        mSurfaceHolder = getHolder();
+
     }
 
     @Override
@@ -43,9 +47,10 @@ public class GameView extends SurfaceView implements Runnable{
         mViewWidth = w;
         mViewHeight = h;
         Bitmap carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.racecar);
-        carBitmap = Bitmap.createScaledBitmap(carBitmap, mViewWidth/8, mViewHeight/7, false);
+        carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/6.5), mViewHeight/8, false);
         mCar = new CarSprite(20, (mViewHeight/2)-(carBitmap.getHeight()/2), 20+carBitmap.getWidth(),
                 (mViewHeight/2)+(carBitmap.getHeight()/2), 0, 0, carBitmap);
+
     }
 
     public void pause() {
@@ -65,6 +70,17 @@ public class GameView extends SurfaceView implements Runnable{
 
     @Override
     public void run() {
+        Canvas canvas;
+        while(mRunning) {
+            if (mSurfaceHolder.getSurface().isValid()) {
+                canvas = mSurfaceHolder.lockCanvas();
+                canvas.save();
+                canvas.drawColor(Color.WHITE);
+                mCar.draw(canvas);
 
+                canvas.restore();
+                mSurfaceHolder.unlockCanvasAndPost(canvas);
+            }
+        }
     }
 }
