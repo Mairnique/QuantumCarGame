@@ -74,6 +74,7 @@ public class GameView extends SurfaceView implements Runnable{
                 mViewHeight*6/7);
     }
 
+
     public void pause() {
         mRunning = false;
         try {
