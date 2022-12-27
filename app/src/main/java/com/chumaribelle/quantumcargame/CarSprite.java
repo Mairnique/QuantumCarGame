@@ -7,6 +7,8 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 
 public class CarSprite extends RectF {
+    private static final double MAX_PIXELS_PER_SECOND = 400.0;
+    private static final double MAX_SPEED = MAX_PIXELS_PER_SECOND / GameView.MAX_UPS;
     int dX, dY;
     int left, top, right, bottom;
     Bitmap carImg;
@@ -22,7 +24,13 @@ public class CarSprite extends RectF {
         canvas.drawBitmap(carImg, null, this, new Paint());
     }
 
-    public void update() {
-        offset(dX, dY);
+    public void update(Joystick joystick, RectF boundary) {
+        dX = (int) (joystick.getXPercent()*MAX_SPEED);
+        dY = (int) (joystick.getYPercent()*MAX_SPEED);
+        RectF test = new RectF(this);
+        test.offset(dX, dY);
+        if(boundary.contains(test)) {
+            offset(dX, dY);
+        }
     }
 }
