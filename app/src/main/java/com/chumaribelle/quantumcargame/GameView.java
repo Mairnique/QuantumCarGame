@@ -7,12 +7,18 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import androidx.annotation.NonNull;
+
 public class GameView extends SurfaceView implements Runnable{
+
+    public static final double MAX_UPS = 30.0;
 
     private SurfaceHolder mSurfaceHolder;
     Context mContext;
@@ -23,6 +29,8 @@ public class GameView extends SurfaceView implements Runnable{
     private Thread mGameThread;
     private Paint mPaint;
     private Path mPath;
+    private Joystick mJoystick;
+    private RectF mBoundary;
 
     public GameView(Context context) {
         super(context);
@@ -43,8 +51,12 @@ public class GameView extends SurfaceView implements Runnable{
     public void init(Context context) {
         mContext = context;
         mSurfaceHolder = getHolder();
+
+        setFocusable(true);
+
         mPaint = new Paint();
     }
+
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -55,7 +67,11 @@ public class GameView extends SurfaceView implements Runnable{
         carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/8.5), (int) (mViewHeight/10), false);
         mCar = new CarSprite(20, (mViewHeight/2)-(carBitmap.getHeight()/2), 20+carBitmap.getWidth(),
                 (mViewHeight/2)+(carBitmap.getHeight()/2), 0, 0, carBitmap);
-
+        mJoystick = new Joystick(200, mViewHeight-200, 150, 40);
+        mBoundary = new RectF(0,
+                mViewHeight/7,
+                mViewWidth,
+                mViewHeight*6/7);
     }
 
     public void pause() {
@@ -73,22 +89,26 @@ public class GameView extends SurfaceView implements Runnable{
         mGameThread.start();
     }
 
-    @Override
-    public void run() {
-        Canvas canvas;
-        while(mRunning) {
-            if (mSurfaceHolder.getSurface().isValid()) {
-                canvas = mSurfaceHolder.lockCanvas();
-                canvas.save();
+    public boolean onTouchEvent(MotionEvent event) {
 
-                drawBackground(canvas);
-
-                mCar.draw(canvas);
-
-                canvas.restore();
-                mSurfaceHolder.unlockCanvasAndPost(canvas);
-            }
+        switch(event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mJoystick = new Joystick((int) event.getX(), (int) event.getY(), 120, 60);
+                if(mJoystick.isPressed(event.getX(), event.getY())) {
+                    mJoystick.setIsPressed(true);
+                }
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                if(mJoystick.getIsPressed()) {
+                    mJoystick.setStick(event.getX(), event.getY());
+                }
+                return true;
+            case MotionEvent.ACTION_UP:
+                mJoystick.setIsPressed(false);
+                mJoystick.resetStick();
+                return true;
         }
+        return super.onTouchEvent(event);
     }
 
     public void drawBackground(Canvas canvas) {
@@ -113,4 +133,48 @@ public class GameView extends SurfaceView implements Runnable{
             }
         }
     }
+
+    @Override
+    public void run() {
+        Canvas canvas;
+        long frameStartTime;
+        long frameTime;
+        final int FPS = 60;
+        while(mRunning) {
+            if (mSurfaceHolder.getSurface().isValid()) {
+                // record start time for run
+                frameStartTime = System.nanoTime();
+
+                canvas = mSurfaceHolder.lockCanvas();
+                canvas.save();
+
+                drawBackground(canvas);
+
+                mCar.draw(canvas);
+
+                mCar.update(mJoystick, mBoundary);
+
+                if(mJoystick.getIsPressed()) {
+                    mJoystick.draw(canvas);
+                    mJoystick.update();
+                }
+
+
+                canvas.restore();
+                mSurfaceHolder.unlockCanvasAndPost(canvas);
+
+                frameTime = (System.nanoTime() - frameStartTime) / 1000000;
+
+                if (frameTime < (1000/FPS)) // if faster than the FPS -> wait until FPS matched
+                {
+                    try {
+                        Thread.sleep((int)(1000/FPS) - frameTime);
+                    } catch (InterruptedException e) {}
+                }
+            }
+        }
+    }
+
+
+
 }
