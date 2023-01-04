@@ -31,6 +31,7 @@ public class GameView extends SurfaceView implements Runnable{
     private Path mPath;
     private Joystick mJoystick;
     private RectF mBoundary;
+    private SuperpositionCar mSuperCar;
 
     public GameView(Context context) {
         super(context);
@@ -133,6 +134,14 @@ public class GameView extends SurfaceView implements Runnable{
             }
         }
     }
+
+    public void reset() {
+        Bitmap carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.racecar);
+        carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/8.5), (int) (mViewHeight/10), false);
+        mCar = new CarSprite(20, (mViewHeight/2)-(carBitmap.getHeight()/2), 20+carBitmap.getWidth(),
+                (mViewHeight/2)+(carBitmap.getHeight()/2), 0, 0, carBitmap);
+    }
+
 
     @Override
     public void run() {
