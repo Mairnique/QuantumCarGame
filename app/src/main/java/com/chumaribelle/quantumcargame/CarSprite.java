@@ -9,11 +9,10 @@ import android.graphics.RectF;
 public class CarSprite extends RectF {
     private static final double MAX_PIXELS_PER_SECOND = 400.0;
     private static final double MAX_SPEED = MAX_PIXELS_PER_SECOND / GameView.MAX_UPS;
-    int dX, dY;
-    int left, top, right, bottom;
+    float dX, dY;
     Bitmap carImg;
 
-    public CarSprite(int l, int t, int r, int b, int dX, int dY, Bitmap bitmap) {
+    public CarSprite(int l, int t, int r, int b, float dX, float dY, Bitmap bitmap) {
         super(l,t,r,b);
         carImg = bitmap;
         this.dX = dX;
@@ -25,12 +24,20 @@ public class CarSprite extends RectF {
     }
 
     public void update(Joystick joystick, RectF boundary) {
-        dX = (int) (joystick.getXPercent()*MAX_SPEED);
-        dY = (int) (joystick.getYPercent()*MAX_SPEED);
-        RectF test = new RectF(this);
-        test.offset(dX, dY);
-        if(boundary.contains(test)) {
-            offset(dX, dY);
+        if (joystick.getIsPressed()) {
+            dX = (float) (joystick.getXPercent() * MAX_SPEED);
+            dY = (float) (joystick.getYPercent() * MAX_SPEED);
+        }
+        else {
+
+            dX = (float) (dX>0 ? Math.max(dX - 0.25, 0): Math.min(dX+0.25, 0));
+            dY = (float) (dY>0 ? Math.max(dY - 0.25, 0): Math.min(dY+0.25, 0));
+        }
+        if (this.left+dX > boundary.left && this.right+dX < boundary.right) {
+            offset(dX, 0);
+        }
+        if (this.top+dY > boundary.top && this.bottom+dY<boundary.bottom) {
+            offset(0, dY);
         }
     }
 }
