@@ -1,0 +1,130 @@
+Index: app/src/main/java/com/chumaribelle/quantumcargame/GameView.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.chumaribelle.quantumcargame;\r\n\r\nimport android.content.Context;\r\nimport android.graphics.Bitmap;\r\nimport android.graphics.BitmapFactory;\r\nimport android.graphics.Canvas;\r\nimport android.graphics.Color;\r\nimport android.graphics.Paint;\r\nimport android.graphics.Path;\r\nimport android.graphics.RectF;\r\nimport android.graphics.Region;\r\nimport android.util.AttributeSet;\r\nimport android.view.MotionEvent;\r\nimport android.view.SurfaceHolder;\r\nimport android.view.SurfaceView;\r\n\r\nimport androidx.annotation.NonNull;\r\n\r\npublic class GameView extends SurfaceView implements Runnable{\r\n\r\n    public static final double MAX_UPS = 30.0;\r\n\r\n    private SurfaceHolder mSurfaceHolder;\r\n    Context mContext;\r\n    private int mViewWidth;\r\n    private int mViewHeight;\r\n    private CarSprite mCar;\r\n    private boolean mRunning;\r\n    private Thread mGameThread;\r\n    private Paint mPaint;\r\n    private Path mPath;\r\n    private Joystick mJoystick;\r\n    private RectF mBoundary;\r\n\r\n    public GameView(Context context) {\r\n        super(context);\r\n        init(context);\r\n    }\r\n\r\n    public GameView(Context context, AttributeSet attrs) {\r\n        super(context, attrs);\r\n        init(context);\r\n    }\r\n\r\n    public GameView(Context context, AttributeSet attrs, int defStyleAttr) {\r\n        super(context, attrs, defStyleAttr);\r\n        init(context);\r\n        mSurfaceHolder = getHolder();\r\n    }\r\n\r\n    public void init(Context context) {\r\n        mContext = context;\r\n        mSurfaceHolder = getHolder();\r\n\r\n        setFocusable(true);\r\n\r\n        mPaint = new Paint();\r\n    }\r\n\r\n\r\n    @Override\r\n    protected void onSizeChanged(int w, int h, int oldw, int oldh) {\r\n        super.onSizeChanged(w, h, oldw, oldh);\r\n        mViewWidth = w;\r\n        mViewHeight = h;\r\n        Bitmap carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.racecar);\r\n        carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/8.5), (int) (mViewHeight/10), false);\r\n        mCar = new CarSprite(20, (mViewHeight/2)-(carBitmap.getHeight()/2), 20+carBitmap.getWidth(),\r\n                (mViewHeight/2)+(carBitmap.getHeight()/2), 0, 0, carBitmap);\r\n        mJoystick = new Joystick(200, mViewHeight-200, 150, 40);\r\n        mBoundary = new RectF(0,\r\n                mViewHeight/7,\r\n                mViewWidth,\r\n                mViewHeight*6/7);\r\n    }\r\n\r\n    public void pause() {\r\n        mRunning = false;\r\n        try {\r\n            // Stop the thread (rejoin the main thread)\r\n            mGameThread.join();\r\n        } catch (InterruptedException e) {\r\n        }\r\n    }\r\n\r\n    public void resume() {\r\n        mRunning = true;\r\n        mGameThread = new Thread(this);\r\n        mGameThread.start();\r\n    }\r\n\r\n    public boolean onTouchEvent(MotionEvent event) {\r\n\r\n        switch(event.getAction()) {\r\n            case MotionEvent.ACTION_DOWN:\r\n                mJoystick = new Joystick((int) event.getX(), (int) event.getY(), 120, 60);\r\n                if(mJoystick.isPressed(event.getX(), event.getY())) {\r\n                    mJoystick.setIsPressed(true);\r\n                }\r\n                return true;\r\n            case MotionEvent.ACTION_MOVE:\r\n                if(mJoystick.getIsPressed()) {\r\n                    mJoystick.setStick(event.getX(), event.getY());\r\n                }\r\n                return true;\r\n            case MotionEvent.ACTION_UP:\r\n                mJoystick.setIsPressed(false);\r\n                mJoystick.resetStick();\r\n                return true;\r\n        }\r\n        return super.onTouchEvent(event);\r\n    }\r\n\r\n    public void drawBackground(Canvas canvas) {\r\n        // Grass\r\n        mPaint.setColor(Color.GREEN);\r\n        canvas.drawRect(0,0,mViewWidth,(float) mViewHeight/7, mPaint);\r\n        canvas.drawRect(0, (float) mViewHeight*6/7, mViewWidth, mViewHeight, mPaint);\r\n\r\n        // Road\r\n        mPaint.setColor(Color.GRAY);\r\n        canvas.drawRect(0, (float) mViewHeight/7, mViewWidth, (float) mViewHeight*6/7, mPaint);\r\n\r\n        // Lane Markers\r\n        mPaint.setColor(Color.WHITE);\r\n        for(int i=2; i<6; i++) {\r\n            float top = (float) mViewHeight/7*i-5;\r\n            float bottom = top+10;\r\n            for(int j=0; j<=10; j++) {\r\n                float left = (float) mViewWidth/10*j + (float) mViewWidth/20;\r\n                float right = left+25;\r\n                canvas.drawRect(left, top, right, bottom, mPaint);\r\n            }\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public void run() {\r\n        Canvas canvas;\r\n        long frameStartTime;\r\n        long frameTime;\r\n        final int FPS = 60;\r\n        while(mRunning) {\r\n            if (mSurfaceHolder.getSurface().isValid()) {\r\n                // record start time for run\r\n                frameStartTime = System.nanoTime();\r\n\r\n                canvas = mSurfaceHolder.lockCanvas();\r\n                canvas.save();\r\n\r\n                drawBackground(canvas);\r\n\r\n                mCar.draw(canvas);\r\n\r\n                mCar.update(mJoystick, mBoundary);\r\n\r\n                if(mJoystick.getIsPressed()) {\r\n                    mJoystick.draw(canvas);\r\n                    mJoystick.update();\r\n                }\r\n\r\n\r\n                canvas.restore();\r\n                mSurfaceHolder.unlockCanvasAndPost(canvas);\r\n\r\n                frameTime = (System.nanoTime() - frameStartTime) / 1000000;\r\n\r\n                if (frameTime < (1000/FPS)) // if faster than the FPS -> wait until FPS matched\r\n                {\r\n                    try {\r\n                        Thread.sleep((int)(1000/FPS) - frameTime);\r\n                    } catch (InterruptedException e) {}\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/chumaribelle/quantumcargame/GameView.java b/app/src/main/java/com/chumaribelle/quantumcargame/GameView.java
+--- a/app/src/main/java/com/chumaribelle/quantumcargame/GameView.java	(revision c1ded2dc7ef47b56dbb042abe301b52c94d4ca01)
++++ b/app/src/main/java/com/chumaribelle/quantumcargame/GameView.java	(date 1672876642164)
+@@ -16,6 +16,8 @@
+ 
+ import androidx.annotation.NonNull;
+ 
++import java.util.ArrayList;
++
+ public class GameView extends SurfaceView implements Runnable{
+ 
+     public static final double MAX_UPS = 30.0;
+@@ -31,6 +33,11 @@
+     private Path mPath;
+     private Joystick mJoystick;
+     private RectF mBoundary;
++    private DecoherenceSprite mDecoherence;
++    private int position;
++    private int lastDecoPosition;
++    private Bitmap decoBitmap;
++    private ArrayList<DecoherenceSprite> decoArray;
+ 
+     public GameView(Context context) {
+         super(context);
+@@ -51,9 +58,7 @@
+     public void init(Context context) {
+         mContext = context;
+         mSurfaceHolder = getHolder();
+-
+         setFocusable(true);
+-
+         mPaint = new Paint();
+     }
+ 
+@@ -72,6 +77,10 @@
+                 mViewHeight/7,
+                 mViewWidth,
+                 mViewHeight*6/7);
++
++        // Decoherence Setup
++        Bitmap decoBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.decoherence);
++        decoArray = new ArrayList<DecoherenceSprite>();
+     }
+ 
+     public void pause() {
+@@ -136,11 +145,19 @@
+ 
+     @Override
+     public void run() {
++        // Variables
+         Canvas canvas;
+         long frameStartTime;
+         long frameTime;
+         final int FPS = 60;
++        int decoRand = (int)(Math.random() * 10);
++        int prevPosition = position;
++
++        // Running stuff
++        position = position + 5; // update position
++        System.out.println("POS2 " + position);
+         while(mRunning) {
++            System.out.println("HIHI");
+             if (mSurfaceHolder.getSurface().isValid()) {
+                 // record start time for run
+                 frameStartTime = System.nanoTime();
+@@ -159,6 +176,21 @@
+                     mJoystick.update();
+                 }
+ 
++                // Decoherence
++                for (int i = decoArray.size() - 1; i >= 0; i--){
++                    decoArray.get(i).drawDecoherence(canvas);
++                    decoArray = decoArray.get(i).update(canvas, decoArray);
++                }
++                System.out.println("POS" + position + "; " + lastDecoPosition);
++                if (position - lastDecoPosition > 50) {
++                    if (Math.random() * 50 < 25){
++                        System.out.println("HEYYYY");
++                        generateDecoherence(canvas);
++                        lastDecoPosition = position;
++                    }
++                }
++                // End Decoherence
++
+ 
+                 canvas.restore();
+                 mSurfaceHolder.unlockCanvasAndPost(canvas);
+@@ -175,6 +207,18 @@
+         }
+     }
+ 
++    private void generateDecoherence(Canvas canvas) {
++        System.out.println("HEY");
++        int y = 0;
++        for (int i = 0; i < 5; i++){
++            y += mViewHeight/7;
++            if (Math.random() * 50 < 25) {
++                DecoherenceSprite deco = new DecoherenceSprite(mViewWidth,y - 25,mViewWidth - 50,y + 25,-5, Color.RED, decoBitmap);
++                decoArray.add(deco); // saved decoherence to array
++                deco.drawDecoherence(canvas);
++            }
++        }
++    }
+ 
+ 
+ }
+Index: app/src/main/java/com/chumaribelle/quantumcargame/Joystick.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.chumaribelle.quantumcargame;\r\n\r\n\r\nimport android.graphics.Canvas;\r\nimport android.graphics.Color;\r\nimport android.graphics.Paint;\r\n\r\npublic class Joystick{\r\n\r\n    private Paint innerPaint;\r\n    private Paint outerPaint;\r\n    private int outerCenterX;\r\n    private int outerCenterY;\r\n    private int innerCenterX;\r\n    private int innerCenterY;\r\n    private int outerRadius;\r\n    private int innerRadius;\r\n    private boolean mIsPressed;\r\n    private double xPercent;\r\n    private double yPercent;\r\n\r\n    public Joystick(int cX, int cY, int or, int ir) {\r\n\r\n        // Outer and inner circles\r\n        outerCenterX = cX;\r\n        outerCenterY = cY;\r\n        innerCenterX = cX;\r\n        innerCenterY = cY;\r\n\r\n        // Radii of circles\r\n        outerRadius = or;\r\n        innerRadius = ir;\r\n\r\n        // Paint for circles\r\n        outerPaint = new Paint();\r\n        outerPaint.setColor(Color.WHITE);\r\n        outerPaint.setAlpha(70);\r\n        outerPaint.setStyle(Paint.Style.FILL_AND_STROKE);\r\n\r\n        innerPaint = new Paint();\r\n        innerPaint.setColor(Color.BLUE);\r\n        innerPaint.setAlpha(200);\r\n        innerPaint.setStyle(Paint.Style.FILL_AND_STROKE);\r\n\r\n    }\r\n\r\n    public void draw(Canvas canvas) {\r\n        canvas.drawCircle(\r\n                 outerCenterX,\r\n                 outerCenterY,\r\n                 outerRadius,\r\n                outerPaint\r\n        );\r\n\r\n        canvas.drawCircle(\r\n                 innerCenterX,\r\n                 innerCenterY,\r\n                 innerRadius,\r\n                innerPaint\r\n        );\r\n    }\r\n\r\n    public void update() {\r\n        updateStick();\r\n    }\r\n\r\n    private void updateStick() {\r\n        innerCenterX = (int) (outerCenterX + xPercent *outerRadius);\r\n        innerCenterY = (int) (outerCenterY + yPercent *outerRadius);\r\n    }\r\n\r\n    public boolean isPressed(double x, double y) {\r\n        double distanceToPress = Math.sqrt(Math.pow(x - outerCenterX, 2) + Math.pow(y-outerCenterY, 2));\r\n        return distanceToPress < outerRadius;\r\n    }\r\n\r\n    public void setIsPressed(boolean b) {\r\n        mIsPressed = b;\r\n    }\r\n\r\n    public boolean getIsPressed() {\r\n        return mIsPressed;\r\n    }\r\n\r\n    public void setStick(double x, double y) {\r\n        double xdist = x - innerCenterX;\r\n        double ydist = y - outerCenterY;\r\n        double distanceToPress = Math.sqrt(Math.pow(x - outerCenterX, 2) + Math.pow(y-outerCenterY, 2));\r\n\r\n        if(distanceToPress < outerRadius) {\r\n            xPercent = xdist/outerRadius;\r\n            yPercent = ydist/outerRadius;\r\n        }\r\n        else {\r\n            xPercent = xdist/distanceToPress;\r\n            yPercent = ydist/distanceToPress;\r\n        }\r\n    }\r\n\r\n    public void resetStick() {\r\n        xPercent = yPercent = 0.0;\r\n    }\r\n\r\n    public double getXPercent() {\r\n        return xPercent;\r\n    }\r\n\r\n    public double getYPercent() {\r\n        return yPercent;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/chumaribelle/quantumcargame/Joystick.java b/app/src/main/java/com/chumaribelle/quantumcargame/Joystick.java
+--- a/app/src/main/java/com/chumaribelle/quantumcargame/Joystick.java	(revision c1ded2dc7ef47b56dbb042abe301b52c94d4ca01)
++++ b/app/src/main/java/com/chumaribelle/quantumcargame/Joystick.java	(date 1672846574989)
+@@ -108,4 +108,4 @@
+     public double getYPercent() {
+         return yPercent;
+     }
+-}
++}
+\ No newline at end of file
