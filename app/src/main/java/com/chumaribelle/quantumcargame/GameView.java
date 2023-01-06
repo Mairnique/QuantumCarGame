@@ -27,6 +27,7 @@ public class GameView extends SurfaceView implements Runnable{
     private int mViewWidth;
     private int mViewHeight;
     private CarSprite mCar;
+    private Bitmap carBitmap;
     private boolean mRunning;
     private Thread mGameThread;
     private Paint mPaint;
@@ -152,6 +153,19 @@ public class GameView extends SurfaceView implements Runnable{
         }
     }
 
+    private void generateDecoherence(Canvas canvas) {
+        System.out.println("HEY");
+        int y = 0;
+        for (int i = 0; i < 5; i++){
+            y += mViewHeight/7;
+            if (Math.random() * 50 < 25) {
+                DecoherenceSprite deco = new DecoherenceSprite(mViewWidth,y - 25,mViewWidth - 50,y + 25,-5, Color.RED, decoBitmap);
+                decoArray.add(deco); // saved decoherence to array
+                deco.drawDecoherence(canvas);
+            }
+        }
+    }
+
     @Override
     public void run() {
         // Variables
@@ -217,16 +231,5 @@ public class GameView extends SurfaceView implements Runnable{
         }
     }
 
-    private void generateDecoherence(Canvas canvas) {
-        System.out.println("HEY");
-        int y = 0;
-        for (int i = 0; i < 5; i++){
-            y += mViewHeight/7;
-            if (Math.random() * 50 < 3) {
-                DecoherenceSprite deco = new DecoherenceSprite(mViewWidth,y,mViewWidth - 50,y + decoWidth, speed + 2, Color.RED, decoBitmap);
-                decoArray.add(deco); // saved decoherence to array
-                deco.drawDecoherence(canvas);
-            }
-        }
-    }
+
 }
