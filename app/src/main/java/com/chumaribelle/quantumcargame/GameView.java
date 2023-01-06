@@ -180,7 +180,6 @@ public class GameView extends SurfaceView implements Runnable{
                 // Decoherence
                 for (int i = decoArray.size() - 1; i >= 0; i--){
                     decoArray.get(i).drawDecoherence(canvas);
-                    decoArray = decoArray.get(i).update(canvas, decoArray);
                 }
                 System.out.println("POS" + position + "; " + lastDecoPosition);
                 if (position - lastDecoPosition > 50) {
