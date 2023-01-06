@@ -30,14 +30,12 @@ public class DecoherenceSprite extends RectF {
     }
 
     //  ********* MOVEMENT METHODS ********************
-    public ArrayList<DecoherenceSprite> update(Canvas canvas, ArrayList<DecoherenceSprite> array) {
-        for (int i = array.size() - 1; i >= 0; i--) {
+    public boolean updateOk(Canvas canvas) {
             if(left - dX <= 0){
-                array.remove(i);
+                return false;
             }
             offset(dX, 0);
-        }
-        return array;
+        return true;
     }
 
     public void drawDecoherence(Canvas canvas) {

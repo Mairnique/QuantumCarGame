@@ -155,9 +155,9 @@ public class GameView extends SurfaceView implements Runnable{
         int prevPosition = position;
 
         // Running stuff
-        position = position + 5; // update position
         System.out.println("POS2 " + position);
         while(mRunning) {
+            position = position + 5; // update position
             System.out.println("HIHI");
             if (mSurfaceHolder.getSurface().isValid()) {
                 // record start time for run
@@ -180,7 +180,6 @@ public class GameView extends SurfaceView implements Runnable{
                 // Decoherence
                 for (int i = decoArray.size() - 1; i >= 0; i--){
                     decoArray.get(i).drawDecoherence(canvas);
-                    decoArray = decoArray.get(i).update(canvas, decoArray);
                 }
                 System.out.println("POS" + position + "; " + lastDecoPosition);
                 if (position - lastDecoPosition > 50) {
