@@ -79,8 +79,8 @@ public class GameView extends SurfaceView implements Runnable{
                 mViewHeight*6/7);
 
         // Decoherence Setup
-        Bitmap decoBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.decoherence);
-        decoArray = new ArrayList<DecoherenceSprite>();
+        decoBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.decoherence);
+        decoArray = new ArrayList<>();
     }
 
 
@@ -157,9 +157,9 @@ public class GameView extends SurfaceView implements Runnable{
         // Running stuff
         System.out.println("POS2 " + position);
         while(mRunning) {
-            position = position + 5; // update position
-            System.out.println("HIHI");
             if (mSurfaceHolder.getSurface().isValid()) {
+                this.position += 5; // update position
+
                 // record start time for run
                 frameStartTime = System.nanoTime();
 
