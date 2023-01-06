@@ -16,6 +16,8 @@ import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+
 public class GameView extends SurfaceView implements Runnable{
 
     public static final double MAX_UPS = 30.0;
@@ -31,7 +33,11 @@ public class GameView extends SurfaceView implements Runnable{
     private Path mPath;
     private Joystick mJoystick;
     private RectF mBoundary;
-    private SuperpositionCar mSuperCar;
+    private DecoherenceSprite mDecoherence;
+    private int position;
+    private int lastDecoPosition;
+    private Bitmap decoBitmap;
+    private ArrayList<DecoherenceSprite> decoArray;
 
     public GameView(Context context) {
         super(context);
@@ -52,9 +58,7 @@ public class GameView extends SurfaceView implements Runnable{
     public void init(Context context) {
         mContext = context;
         mSurfaceHolder = getHolder();
-
         setFocusable(true);
-
         mPaint = new Paint();
     }
 
@@ -73,6 +77,10 @@ public class GameView extends SurfaceView implements Runnable{
                 mViewHeight/7,
                 mViewWidth,
                 mViewHeight*6/7);
+
+        // Decoherence Setup
+        Bitmap decoBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.decoherence);
+        decoArray = new ArrayList<DecoherenceSprite>();
     }
 
 
@@ -136,21 +144,21 @@ public class GameView extends SurfaceView implements Runnable{
         }
     }
 
-    public void reset() {
-        Bitmap carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.racecar);
-        carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/8.5), (int) (mViewHeight/10), false);
-        mCar = new CarSprite(20, (mViewHeight/2)-(carBitmap.getHeight()/2), 20+carBitmap.getWidth(),
-                (mViewHeight/2)+(carBitmap.getHeight()/2), 0, 0, carBitmap);
-    }
-
-
     @Override
     public void run() {
+        // Variables
         Canvas canvas;
         long frameStartTime;
         long frameTime;
         final int FPS = 60;
+        int decoRand = (int)(Math.random() * 10);
+        int prevPosition = position;
+
+        // Running stuff
+        position = position + 5; // update position
+        System.out.println("POS2 " + position);
         while(mRunning) {
+            System.out.println("HIHI");
             if (mSurfaceHolder.getSurface().isValid()) {
                 // record start time for run
                 frameStartTime = System.nanoTime();
@@ -169,6 +177,21 @@ public class GameView extends SurfaceView implements Runnable{
                     mJoystick.update();
                 }
 
+                // Decoherence
+                for (int i = decoArray.size() - 1; i >= 0; i--){
+                    decoArray.get(i).drawDecoherence(canvas);
+                    decoArray = decoArray.get(i).update(canvas, decoArray);
+                }
+                System.out.println("POS" + position + "; " + lastDecoPosition);
+                if (position - lastDecoPosition > 50) {
+                    if (Math.random() * 50 < 25){
+                        System.out.println("HEYYYY");
+                        generateDecoherence(canvas);
+                        lastDecoPosition = position;
+                    }
+                }
+                // End Decoherence
+
 
                 canvas.restore();
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
@@ -185,6 +208,16 @@ public class GameView extends SurfaceView implements Runnable{
         }
     }
 
-
-
+    private void generateDecoherence(Canvas canvas) {
+        System.out.println("HEY");
+        int y = 0;
+        for (int i = 0; i < 5; i++){
+            y += mViewHeight/7;
+            if (Math.random() * 50 < 25) {
+                DecoherenceSprite deco = new DecoherenceSprite(mViewWidth,y - 25,mViewWidth - 50,y + 25,-5, Color.RED, decoBitmap);
+                decoArray.add(deco); // saved decoherence to array
+                deco.drawDecoherence(canvas);
+            }
+        }
+    }
 }
