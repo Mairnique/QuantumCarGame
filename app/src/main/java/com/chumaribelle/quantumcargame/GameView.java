@@ -34,14 +34,27 @@ public class GameView extends SurfaceView implements Runnable{
     private Path mPath;
     private Joystick mJoystick;
     private RectF mBoundary;
-    private DecoherenceSprite mDecoherence;
     private int position;
+    // decoherence variables
+    private DecoherenceSprite mDecoherence;
     private int lastDecoPosition;
     private Bitmap decoBitmap;
     private ArrayList<DecoherenceSprite> decoArray;
     private int speed;
-    private int decoHeight;
     private int decoWidth;
+    // probability variables
+    private Bitmap probBitmap;
+    private ArrayList<ProbabilitySprite> probArray;
+    private int lastProbPosition;
+    private int probWidth;
+    // collisions
+    private int probTotal;
+    private int dProb;
+    private int decoScreenPosition;
+    // finish line
+    private Bitmap finBitmap;
+    private FinishLineSprite finSprite;
+    private int finLinePos;
 
     public GameView(Context context) {
         super(context);
@@ -66,15 +79,19 @@ public class GameView extends SurfaceView implements Runnable{
         mPaint = new Paint();
     }
 
-
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         mViewWidth = w;
         mViewHeight = h;
-        speed = -5;
-        decoWidth = (int) (mViewWidth/16);
+        speed = -10;
+        decoWidth = (int) (mViewWidth/18);
+        probWidth = (int) (mViewWidth/20);
+        dProb = 10;
+        decoScreenPosition = 0;
+        finLinePos = 10000;
 
+        // car bitmap
         Bitmap carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.racecar);
         carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/8.5), (int) (mViewHeight/10), false);
         mCar = new CarSprite(20, (mViewHeight/2)-(carBitmap.getHeight()/2), 20+carBitmap.getWidth(),
@@ -88,10 +105,18 @@ public class GameView extends SurfaceView implements Runnable{
         // Decoherence Setup
         decoBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.decoherence);
         decoBitmap = Bitmap.createScaledBitmap(decoBitmap, decoWidth, decoWidth, false);
-
         decoArray = new ArrayList<>();
-    }
 
+        // Probability Setup
+        probBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.probability);
+        probBitmap = Bitmap.createScaledBitmap(probBitmap, probWidth, probWidth, false);
+        probArray = new ArrayList<>();
+
+        // Finish Line Setup
+        finBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.finishline);
+        finBitmap = Bitmap.createScaledBitmap(finBitmap, mViewWidth / 8, mViewHeight, false);
+        finSprite = new FinishLineSprite(mViewWidth - mViewWidth / 8, 0, mViewWidth, mViewHeight, speed, Color.RED, finBitmap);
+    }
 
     public void pause() {
         mRunning = false;
@@ -153,17 +178,27 @@ public class GameView extends SurfaceView implements Runnable{
         }
     }
 
-    private void generateDecoherence(Canvas canvas) {
-        System.out.println("HEY");
+    private void generateDecoherenceProbability(Canvas canvas) {
         int y = 0;
         for (int i = 0; i < 5; i++){
             y += mViewHeight/7;
-            if (Math.random() * 50 < 25) {
-                DecoherenceSprite deco = new DecoherenceSprite(mViewWidth,y - 25,mViewWidth - 50,y + 25,-5, Color.RED, decoBitmap);
+            if (Math.random() * 50 < 4) {
+                DecoherenceSprite deco = new DecoherenceSprite(mViewWidth,y,mViewWidth - 50,y + decoWidth/2,speed, Color.RED, decoBitmap);
                 decoArray.add(deco); // saved decoherence to array
                 deco.drawDecoherence(canvas);
             }
+            else if (Math.random() * 50 < 4) {
+                ProbabilitySprite prob = new ProbabilitySprite(mViewWidth,y ,mViewWidth - 50,y + probWidth/2,speed, Color.RED, probBitmap);
+                probArray.add(prob); // saved decoherence to array
+                prob.drawProbability(canvas);
+            }
         }
+    }
+
+    private void decoScreen(Canvas canvas){
+        Paint p = new Paint();
+        p.setColor(Color.WHITE);
+        canvas.drawRect(0,0,mViewWidth,mViewHeight, p);
     }
 
     @Override
@@ -180,7 +215,7 @@ public class GameView extends SurfaceView implements Runnable{
         while(mRunning) {
             if (mSurfaceHolder.getSurface().isValid()) {
                 this.position += speed * -1; // update position
-
+                System.out.println("Current Position: " + position);
                 // record start time for run
                 frameStartTime = System.nanoTime();
 
@@ -204,17 +239,50 @@ public class GameView extends SurfaceView implements Runnable{
                     if (decoArray.get(i).updateOk(canvas) == false){
                         decoArray.remove(i);
                     }
+                    // if car intersects decoherence, delete decoherence and make screen white with static
+                    else if ((decoArray.get(i)).intersect(mCar)){
+                        decoScreen(canvas); // draw the deco screen
+                        decoScreenPosition = position;
+                        decoArray.remove(i);
+                    }
                 }
-                System.out.println("POS" + position + "; " + lastDecoPosition);
+
+                // each 10 frames
                 if (position - lastDecoPosition > mViewWidth/10) {
-                    if (Math.random() * 50 < 25){
-                        System.out.println("HEYYYY");
-                        generateDecoherence(canvas);
+                    if (Math.random() * 50 < 4 && !(position > finLinePos)){
+                        generateDecoherenceProbability(canvas);
                         lastDecoPosition = position;
                     }
                 }
-                // End Decoherence
 
+                if (position - decoScreenPosition < 500) {
+                    decoScreen(canvas);
+                }
+
+                // Probability
+                for (int i = probArray.size() - 1; i >= 0; i--){
+                    if (position - decoScreenPosition >= 500) {
+                        probArray.get(i).drawProbability(canvas);
+                    }
+                    if (probArray.get(i).updateOk(canvas) == false){
+                        probArray.remove(i);
+                    }
+                    // probability collide with car, delete it and add to probTotal
+                    else if ((probArray.get(i)).intersect(mCar)){
+                        probArray.remove(i);
+                        probTotal += dProb;
+                        System.out.println(probTotal);
+                    }
+                }
+
+                if (position > finLinePos) {
+                    finSprite.drawFinishLine(canvas);
+                    finSprite.updateOk(canvas);
+
+//                    if (position > finLinePos + mViewWidth) {
+                        finSprite.drawFinishLineScreen(canvas, mViewWidth, mViewHeight);
+//                    }
+                }
 
                 canvas.restore();
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
