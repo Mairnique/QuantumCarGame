@@ -28,6 +28,7 @@ public class GameView extends SurfaceView implements Runnable{
     private int mViewHeight;
     private CarSprite mCar;
     private Bitmap carBitmap;
+    private SuperpositionCar superCar;
     private boolean mRunning;
     private Thread mGameThread;
     private Paint mPaint;
@@ -40,8 +41,11 @@ public class GameView extends SurfaceView implements Runnable{
     private Bitmap decoBitmap;
     private ArrayList<DecoherenceSprite> decoArray;
     private int speed;
-    private int decoHeight;
     private int decoWidth;
+
+    boolean inSuperposition;
+    long superpositionStart;
+    long timeSinceSuperStart;
 
     public GameView(Context context) {
         super(context);
@@ -75,7 +79,7 @@ public class GameView extends SurfaceView implements Runnable{
         speed = -5;
         decoWidth = (int) (mViewWidth/16);
 
-        Bitmap carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.racecar);
+        carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.racecar);
         carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/8.5), (int) (mViewHeight/10), false);
         mCar = new CarSprite(20, (mViewHeight/2)-(carBitmap.getHeight()/2), 20+carBitmap.getWidth(),
                 (mViewHeight/2)+(carBitmap.getHeight()/2), 0, 0, carBitmap);
@@ -90,6 +94,8 @@ public class GameView extends SurfaceView implements Runnable{
         decoBitmap = Bitmap.createScaledBitmap(decoBitmap, decoWidth, decoWidth, false);
 
         decoArray = new ArrayList<>();
+
+        inSuperposition = false;
     }
 
 
@@ -166,6 +172,7 @@ public class GameView extends SurfaceView implements Runnable{
         }
     }
 
+
     @Override
     public void run() {
         // Variables
@@ -173,8 +180,9 @@ public class GameView extends SurfaceView implements Runnable{
         long frameStartTime;
         long frameTime;
         final int FPS = 60;
-        int decoRand = (int)(Math.random() * 10);
         int prevPosition = position;
+        boolean createSuperposition = false;
+
 
         // Running stuff
         while(mRunning) {
@@ -190,8 +198,12 @@ public class GameView extends SurfaceView implements Runnable{
                 drawBackground(canvas);
 
                 mCar.draw(canvas);
-
                 mCar.update(mJoystick, mBoundary);
+
+                if(inSuperposition && superCar.inBounds) {
+                    superCar.draw(canvas);
+                    superCar.update(mBoundary);
+                }
 
                 if(mJoystick.getIsPressed()) {
                     mJoystick.draw(canvas);
@@ -205,15 +217,42 @@ public class GameView extends SurfaceView implements Runnable{
                         decoArray.remove(i);
                     }
                 }
-                System.out.println("POS" + position + "; " + lastDecoPosition);
-                if (position - lastDecoPosition > mViewWidth/10) {
-                    if (Math.random() * 50 < 25){
+                if (position - lastDecoPosition > decoWidth) {
+                    int decoRand = (int)(Math.random()*50);
+                    if (decoRand < 25){
                         System.out.println("HEYYYY");
                         generateDecoherence(canvas);
                         lastDecoPosition = position;
                     }
                 }
                 // End Decoherence
+
+                // Updating superposition
+                if (position - lastDecoPosition > decoWidth && !createSuperposition && !inSuperposition) {
+                    double superRand = (Math.random() * 500);
+                    if (superRand < 5) {
+                        createSuperposition = true; // Determine whether to create superposition
+                        superpositionStart = System.nanoTime();
+                    }
+                }
+                if (createSuperposition && !inSuperposition) {
+
+                    timeSinceSuperStart = System.nanoTime() - superpositionStart;
+                    int secondsVal = (3 - (int) (timeSinceSuperStart/1000000000));
+                    System.out.println(timeSinceSuperStart/1000000000);
+                    if (secondsVal <= 0) {
+                        createSuperposition = false;
+                        inSuperposition = true;
+                        superCar = new SuperpositionCar(mCar, speed, carBitmap, position);
+                    }
+                    String superString = "";
+                    superString = "Superposition in " + secondsVal;
+
+                    Paint text = new Paint();
+                    text.setTextSize(50);
+                    canvas.drawText(superString, (float) mViewWidth *6/8, 100, text);
+                }
+
 
 
                 canvas.restore();

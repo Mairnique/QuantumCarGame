@@ -13,6 +13,7 @@ public class SuperpositionCar extends CarSprite {
     public SuperpositionCar(CarSprite car, float dX, Bitmap bitmap, int pos) {
         super((int) car.left, (int) car.top, (int) car.right, (int) car.bottom, dX, 0, bitmap);
         this.pos = pos;
+        inBounds = true;
     }
 
     public void update(RectF boundary) {
