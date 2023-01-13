@@ -49,13 +49,20 @@ public class GameView extends SurfaceView implements Runnable{
     private int lastProbPosition;
     private int probWidth;
     // collisions
-    private int probTotal;
-    private int dProb;
+    private int probTotal; // total amount of probability
+    private int dProb; // amount we want to add to the prob
+
     private int decoScreenPosition;
     // finish line
     private Bitmap finBitmap;
     private FinishLineSprite finSprite;
     private int finLinePos;
+    private Bitmap gameoverBitmap;
+    private FinishLineSprite gameoverSprite;
+
+    // time
+    private int finalTime;
+    long frameTime;
 
     boolean inSuperposition;
     long superpositionStart;
@@ -94,7 +101,9 @@ public class GameView extends SurfaceView implements Runnable{
         probWidth = (int) (mViewWidth/20);
         dProb = 10;
         decoScreenPosition = 0;
-        finLinePos = 10000;
+        finLinePos = 1000;
+        finalTime = 0;
+        frameTime = 0;
 
         // car bitmap
         carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.racecar);
@@ -123,6 +132,10 @@ public class GameView extends SurfaceView implements Runnable{
         finSprite = new FinishLineSprite(mViewWidth - mViewWidth / 8, 0, mViewWidth, mViewHeight, speed, Color.RED, finBitmap);
 
         inSuperposition = false;
+
+        // Game Over Setup
+        gameoverBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.gameover);
+        gameoverBitmap = Bitmap.createScaledBitmap(gameoverBitmap, mViewWidth/2, mViewHeight / 2, false);
     }
 
     public void pause() {
@@ -214,7 +227,6 @@ public class GameView extends SurfaceView implements Runnable{
         // Variables
         Canvas canvas;
         long frameStartTime;
-        long frameTime;
         final int FPS = 60;
         int decoRand = (int)(Math.random() * 10);
         int prevPosition = position;
@@ -316,13 +328,19 @@ public class GameView extends SurfaceView implements Runnable{
                     }
                 }
 
+                // Finish Line Animations
                 if (position > finLinePos) {
                     finSprite.drawFinishLine(canvas);
                     finSprite.updateOk(canvas);
+                    if (finalTime == 0) {
+                        finalTime = (int)(frameTime);
+                    }
 
-//                    if (position > finLinePos + mViewWidth) {
-                        finSprite.drawFinishLineScreen(canvas, mViewWidth, mViewHeight);
-//                    }
+                    if (finSprite.updateOk(canvas) == false) {
+                        finSprite.drawFinishLineScreen(canvas, mViewWidth, mViewHeight, gameoverBitmap, Integer.toString(finalTime));
+
+                    }
+
                 }
 
                 canvas.restore();

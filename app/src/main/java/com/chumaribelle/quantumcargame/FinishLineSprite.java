@@ -37,15 +37,21 @@ public class FinishLineSprite extends RectF {
     public void drawFinishLine(Canvas canvas) {
         System.out.println("DREW DECOHERENCE");
         canvas.drawBitmap(finishLine, left, top, new Paint());
-    }
-
-    public void drawFinishLineScreen(Canvas canvas, int width, int height) {
         Paint paint = new Paint();
         paint.setColor(color);
         int transparency = 255;
         paint.setARGB(transparency, 20, 200, 200);
         setColor(paint.getColor());
-        canvas.drawRect(right, 0, width, height, paint);
+        canvas.drawRect(right, 0, canvas.getWidth(), canvas.getHeight(), paint);
+    }
+
+    public void drawFinishLineScreen(Canvas canvas, int width, int height, Bitmap gameover, String finalTime) {
+        canvas.drawBitmap(gameover, (int)(width/2- gameover.getWidth()/2), (int) (height/2 - gameover.getHeight()/2), new Paint());
+        String finalTimeString = "Your score was: " + finalTime;
+        Paint timeText = new Paint();
+        timeText.setTextSize(50);
+        canvas.drawText(finalTimeString, (float) width *6/8, 100, timeText);
+
     }
 
     // ********* GETTER AND SETTER METHODS ********************
