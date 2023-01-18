@@ -9,12 +9,14 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
 
@@ -60,6 +62,15 @@ public class GameView extends SurfaceView implements Runnable{
     boolean inSuperposition;
     long superpositionStart;
     long timeSinceSuperStart;
+    private boolean createMeasurement;
+    private long measurementStart;
+    private long timeSinceMeasureStart;
+    private long slowDownStart;
+    private long timeSinceSlowDownStart;
+    private boolean rewind;
+    private Bitmap rewindBitmap;
+    private Bitmap staticBitmap;
+
 
     public GameView(Context context) {
         super(context);
@@ -92,6 +103,7 @@ public class GameView extends SurfaceView implements Runnable{
         speed = -10;
         decoWidth = (int) (mViewWidth/18);
         probWidth = (int) (mViewWidth/20);
+        probTotal = 50;
         dProb = 10;
         decoScreenPosition = 0;
         finLinePos = 10000;
@@ -123,6 +135,15 @@ public class GameView extends SurfaceView implements Runnable{
         finSprite = new FinishLineSprite(mViewWidth - mViewWidth / 8, 0, mViewWidth, mViewHeight, speed, Color.RED, finBitmap);
 
         inSuperposition = false;
+
+        // Rewind Image
+        rewindBitmap =  BitmapFactory.decodeResource(mContext.getResources(), R.drawable.rewind);
+        rewindBitmap = Bitmap.createScaledBitmap(rewindBitmap, mViewWidth/8, mViewHeight/8, false);
+
+        // Static Image
+        staticBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.staticimage);
+        staticBitmap = Bitmap.createScaledBitmap(staticBitmap, mViewWidth, mViewHeight, false);
+
     }
 
     public void pause() {
@@ -219,13 +240,21 @@ public class GameView extends SurfaceView implements Runnable{
         int decoRand = (int)(Math.random() * 10);
         int prevPosition = position;
         boolean createSuperposition = false;
+        Paint text = new Paint();
+        text.setTextSize(55);
+        Typeface typeface = ResourcesCompat.getFont(mContext, R.font.goldman_bold);
+        text.setTypeface(typeface);
+        text.setTextAlign(Paint.Align.LEFT);
 
+
+        Paint alphaPaint = new Paint();
+        alphaPaint.setAlpha(60);
 
         // Running stuff
         while(mRunning) {
             if (mSurfaceHolder.getSurface().isValid()) {
                 this.position += speed * -1; // update position
-                System.out.println("Current Position: " + position);
+//                System.out.println("Current Position: " + position);
                 // record start time for run
                 frameStartTime = System.nanoTime();
 
@@ -247,6 +276,11 @@ public class GameView extends SurfaceView implements Runnable{
                     mJoystick.update();
                 }
 
+                if (inSuperposition) {
+                    canvas.drawText("Probability of time-slow: " + probTotal, (float) mViewWidth*1/16, 100, text);
+                    canvas.drawText("Probability of reset to split: " + (100-probTotal), (float) mViewWidth*1/16, mViewHeight-50, text);
+                }
+
                 // Decoherence
                 for (int i = decoArray.size() - 1; i >= 0; i--){
                     decoArray.get(i).drawDecoherence(canvas);
@@ -258,6 +292,7 @@ public class GameView extends SurfaceView implements Runnable{
                         decoScreen(canvas); // draw the deco screen
                         decoScreenPosition = position;
                         decoArray.remove(i);
+                        probTotal = 50;
                     }
                 }
 
@@ -274,9 +309,10 @@ public class GameView extends SurfaceView implements Runnable{
                 }
 
                 // Updating superposition
+
                 if (position - lastDecoPosition > decoWidth && !createSuperposition && !inSuperposition) {
                     double superRand = (Math.random() * 500);
-                    if (superRand < 5) {
+                    if (superRand < 1) {
                         createSuperposition = true; // Determine whether to create superposition
                         superpositionStart = System.nanoTime();
                     }
@@ -286,19 +322,75 @@ public class GameView extends SurfaceView implements Runnable{
                     timeSinceSuperStart = System.nanoTime() - superpositionStart;
                     int secondsVal = (3 - (int) (timeSinceSuperStart/1000000000));
                     System.out.println(timeSinceSuperStart/1000000000);
+
+                    String superString = "";
+                    superString = "Superposition in " + secondsVal;
+
+                    canvas.drawText(superString, (float) mViewWidth *11/16, 100, text);
                     if (secondsVal <= 0) {
                         createSuperposition = false;
                         inSuperposition = true;
                         superCar = new SuperpositionCar(mCar, speed, carBitmap, position);
                     }
-                    String superString = "";
-                    superString = "Superposition in " + secondsVal;
-
-                    Paint text = new Paint();
-                    text.setTextSize(50);
-                    canvas.drawText(superString, (float) mViewWidth *6/8, 100, text);
                 }
 
+                // Measurement
+
+                if (position - lastDecoPosition > decoWidth && !createMeasurement && inSuperposition) {
+                    double measureRand = (Math.random() * 500);
+                    if (measureRand < 1) {
+                        createMeasurement = true; // Determine whether to create superposition
+                        measurementStart = System.nanoTime();
+                    }
+                }
+
+                if (createMeasurement && inSuperposition) {
+                    timeSinceMeasureStart = System.nanoTime() - measurementStart;
+                    int secondsVal = (3 - (int) (timeSinceMeasureStart/1000000000));
+                    System.out.println(timeSinceMeasureStart/1000000000);
+
+                    String measureString = "";
+                    measureString = "Measurement in " + secondsVal;
+
+
+                    canvas.drawText(measureString, (float) mViewWidth *11/16, 100, text);
+
+                    if (secondsVal <= 0) {
+                        createMeasurement = false;
+                        inSuperposition = false;
+                        double measurement = Math.random() * 100;
+                        probTotal = 50;
+                        if (measurement < probTotal) {
+                            slowDownStart = System.nanoTime();
+                            speed = -2;
+                        }
+                        else {
+                            rewind = true;
+                            position = superCar.pos;
+                        }
+                    }
+                }
+
+                // Rewind
+                if(rewind) {
+                    mJoystick.setIsPressed(false);
+                    timeSinceMeasureStart = System.nanoTime() - measurementStart;
+                    int secondsVal = (8 - (int) (timeSinceMeasureStart/1000000000));
+                    // Static
+                    canvas.drawBitmap(staticBitmap, 0, 0, alphaPaint);
+                    if (secondsVal%2 != 0)
+                        canvas.drawBitmap(rewindBitmap, (float) mViewWidth/2-(float)rewindBitmap.getWidth()/2, (float) mViewHeight/2-(float)rewindBitmap.getHeight()/2, new Paint());
+                    if (secondsVal <= 0) {
+                        rewind = false;
+                        mCar = new CarSprite(20, (int) superCar.top, 20+carBitmap.getWidth(), (int) superCar.bottom,0 ,0, carBitmap);
+                    }
+                }
+
+                // Slow down
+                timeSinceSlowDownStart = System.nanoTime() - slowDownStart;
+                if (timeSinceSlowDownStart >= 5L *1000000000) {
+                    speed = -10;
+                }
 
                 // Probability
                 for (int i = probArray.size() - 1; i >= 0; i--){

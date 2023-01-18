@@ -9,9 +9,12 @@ public class SuperpositionCar extends CarSprite {
 
     int pos;
     boolean inBounds;
+    float top, bottom;
 
     public SuperpositionCar(CarSprite car, float dX, Bitmap bitmap, int pos) {
         super((int) car.left, (int) car.top, (int) car.right, (int) car.bottom, dX, 0, bitmap);
+        top = car.top;
+        bottom = car.bottom;
         this.pos = pos;
         inBounds = true;
     }
