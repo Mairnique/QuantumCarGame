@@ -1,6 +1,7 @@
 package com.chumaribelle.quantumcargame;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -14,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -24,6 +26,11 @@ public class GameView extends SurfaceView implements Runnable{
 
     private SurfaceHolder mSurfaceHolder;
     Context mContext;
+    // shared preferences
+//    String TAG = "com.example.quantumcargame.sharedpreferences";
+//    SharedPreferences.Editor editor;
+//    SharedPreferences sharedPreferences;
+
     private int mViewWidth;
     private int mViewHeight;
     private CarSprite mCar;
@@ -104,6 +111,12 @@ public class GameView extends SurfaceView implements Runnable{
         finLinePos = 1000;
         finalTime = 0;
         frameTime = 0;
+
+        // load shared preferences
+//        sharedPreferences = getSharedPreferences(TAG, MODE_PRIVATE);
+        // instantiate editor
+//        editor = sharedPreferences.edit();
+
 
         // car bitmap
         carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.racecar);
