@@ -109,8 +109,8 @@ public class GameView extends SurfaceView implements Runnable{
         finLinePos = 10000;
 
         // car bitmap
-        carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.racecar);
-        carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/8.5), (int) (mViewHeight/10), false);
+        carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.futureracecar);
+        carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/8.5), (int) (mViewHeight/12.5), false);
         mCar = new CarSprite(20, (mViewHeight/2)-(carBitmap.getHeight()/2), 20+carBitmap.getWidth(),
                 (mViewHeight/2)+(carBitmap.getHeight()/2), 0, 0, carBitmap);
         mJoystick = new Joystick(200, mViewHeight-200, 150, 40);
@@ -185,12 +185,12 @@ public class GameView extends SurfaceView implements Runnable{
 
     public void drawBackground(Canvas canvas) {
         // Grass
-        mPaint.setColor(Color.GREEN);
+        mPaint.setColor(Color.rgb(113, 245, 252));
         canvas.drawRect(0,0,mViewWidth,(float) mViewHeight/7, mPaint);
         canvas.drawRect(0, (float) mViewHeight*6/7, mViewWidth, mViewHeight, mPaint);
 
         // Road
-        mPaint.setColor(Color.GRAY);
+        mPaint.setColor(Color.rgb(53, 53, 53));
         canvas.drawRect(0, (float) mViewHeight/7, mViewWidth, (float) mViewHeight*6/7, mPaint);
 
         // Lane Markers
@@ -292,7 +292,10 @@ public class GameView extends SurfaceView implements Runnable{
                         decoScreen(canvas); // draw the deco screen
                         decoScreenPosition = position;
                         decoArray.remove(i);
-                        probTotal = 50;
+                        if (inSuperposition) {
+                            if (probTotal > 30) probTotal = 30;
+                            else probTotal -= 10;
+                        }
                     }
                 }
 
@@ -381,6 +384,7 @@ public class GameView extends SurfaceView implements Runnable{
                     if (secondsVal%2 != 0)
                         canvas.drawBitmap(rewindBitmap, (float) mViewWidth/2-(float)rewindBitmap.getWidth()/2, (float) mViewHeight/2-(float)rewindBitmap.getHeight()/2, new Paint());
                     if (secondsVal <= 0) {
+                        probTotal = 50;
                         rewind = false;
                         mCar = new CarSprite(20, (int) superCar.top, 20+carBitmap.getWidth(), (int) superCar.bottom,0 ,0, carBitmap);
                     }
