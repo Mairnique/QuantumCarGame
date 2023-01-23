@@ -39,7 +39,6 @@ public class DecoherenceSprite extends RectF {
     }
 
     public void drawDecoherence(Canvas canvas) {
-        System.out.println("DREW DECOHERENCE");
         canvas.drawBitmap(decoherenceImage, left,top, new Paint());
     }
 

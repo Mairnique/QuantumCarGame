@@ -14,6 +14,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
@@ -37,10 +38,10 @@ public class GameView extends SurfaceView implements Runnable{
     private Path mPath;
     private Joystick mJoystick;
     private RectF mBoundary;
-    private int position;
+    private float position;
     // decoherence variables
     private DecoherenceSprite mDecoherence;
-    private int lastDecoPosition;
+    private float lastDecoPosition;
     private Bitmap decoBitmap;
     private ArrayList<DecoherenceSprite> decoArray;
     private int speed;
@@ -48,28 +49,39 @@ public class GameView extends SurfaceView implements Runnable{
     // probability variables
     private Bitmap probBitmap;
     private ArrayList<ProbabilitySprite> probArray;
-    private int lastProbPosition;
     private int probWidth;
     // collisions
     private int probTotal;
     private int dProb;
-    private int decoScreenPosition;
+    private float decoScreenStartTime;
+    private float timeSinceDecoScreen;
     // finish line
     private Bitmap finBitmap;
     private FinishLineSprite finSprite;
     private int finLinePos;
 
-    boolean inSuperposition;
-    long superpositionStart;
-    long timeSinceSuperStart;
+    private boolean inSuperposition;
+    private long superpositionStart;
+    private long timeSinceSuperStart;
+    private boolean createSuperposition;
+
     private boolean createMeasurement;
     private long measurementStart;
     private long timeSinceMeasureStart;
-    private long slowDownStart;
-    private long timeSinceSlowDownStart;
-    private boolean rewind;
+    private boolean rewindBool;
     private Bitmap rewindBitmap;
     private Bitmap staticBitmap;
+    private int posIncrement;
+
+    private RectF emptyProgress;
+    private RectF filledProgress;
+    private float measurePos;
+
+    int intervalNum = 0;
+    private float rewindStart;
+    private float timeSinceRewindStart;
+    private int decoTime;
+    private boolean decoScreenOn;
 
 
     public GameView(Context context) {
@@ -105,12 +117,13 @@ public class GameView extends SurfaceView implements Runnable{
         probWidth = (int) (mViewWidth/20);
         probTotal = 50;
         dProb = 10;
-        decoScreenPosition = 0;
-        finLinePos = 10000;
+        finLinePos = 100000;
+        posIncrement = speed*-1;
+        decoTime = 2;
 
         // car bitmap
         carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.futureracecar);
-        carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/8.5), (int) (mViewHeight/12.5), false);
+        carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/9.5), (int) (mViewHeight/12.5), false);
         mCar = new CarSprite(20, (mViewHeight/2)-(carBitmap.getHeight()/2), 20+carBitmap.getWidth(),
                 (mViewHeight/2)+(carBitmap.getHeight()/2), 0, 0, carBitmap);
         mJoystick = new Joystick(200, mViewHeight-200, 150, 40);
@@ -144,6 +157,9 @@ public class GameView extends SurfaceView implements Runnable{
         staticBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.staticimage);
         staticBitmap = Bitmap.createScaledBitmap(staticBitmap, mViewWidth, mViewHeight, false);
 
+        // Progress Bar
+        emptyProgress = new RectF((float) mViewWidth/32, (float) mViewHeight/32, (float) mViewWidth*10/16, (float) mViewHeight/8);
+        filledProgress = new RectF(emptyProgress.left+5, emptyProgress.top+5, emptyProgress.left+5, emptyProgress.bottom-5);
     }
 
     public void pause() {
@@ -210,23 +226,103 @@ public class GameView extends SurfaceView implements Runnable{
         int y = 0;
         for (int i = 0; i < 5; i++){
             y += mViewHeight/7;
-            if (Math.random() * 50 < 4) {
-                DecoherenceSprite deco = new DecoherenceSprite(mViewWidth,y,mViewWidth - 50,y + decoWidth/2,speed, Color.RED, decoBitmap);
+            if (inSuperposition) {
+                if (Math.random() * 50 < 6) {
+                    DecoherenceSprite deco = new DecoherenceSprite(mViewWidth, y, mViewWidth + decoWidth, y + decoWidth, speed, Color.RED, decoBitmap);
+                    decoArray.add(deco); // saved decoherence to array
+                    deco.drawDecoherence(canvas);
+                }
+                else if (Math.random() * 50 < 6) {
+                    ProbabilitySprite prob = new ProbabilitySprite(mViewWidth,y ,mViewWidth + probWidth,y + probWidth,speed, Color.RED, probBitmap);
+                    probArray.add(prob); // saved decoherence to array
+                    prob.drawProbability(canvas);
+                }
+            }
+            else if (Math.random() * 50 < 6) {
+                DecoherenceSprite deco = new DecoherenceSprite(mViewWidth, y, mViewWidth + decoWidth, y + decoWidth, speed, Color.RED, decoBitmap);
                 decoArray.add(deco); // saved decoherence to array
                 deco.drawDecoherence(canvas);
-            }
-            else if (Math.random() * 50 < 4) {
-                ProbabilitySprite prob = new ProbabilitySprite(mViewWidth,y ,mViewWidth - 50,y + probWidth/2,speed, Color.RED, probBitmap);
-                probArray.add(prob); // saved decoherence to array
-                prob.drawProbability(canvas);
             }
         }
     }
 
-    private void decoScreen(Canvas canvas){
+    private void decoScreen(Canvas canvas, float decoScreenStartTime){
         Paint p = new Paint();
-        p.setColor(Color.WHITE);
-        canvas.drawRect(0,0,mViewWidth,mViewHeight, p);
+        float timeSinceDecoStart = (System.nanoTime() - decoScreenStartTime)/1000000000;
+        if (timeSinceDecoStart < 1)
+            p.setAlpha((int) (timeSinceDecoStart*255));
+        if (timeSinceDecoStart > decoTime-1)
+            p.setAlpha((int) ((decoTime-timeSinceDecoStart)*255));
+        canvas.drawBitmap(staticBitmap,0,0, p);
+    }
+
+    private void superposition(Canvas canvas, Paint text) {
+        timeSinceSuperStart = System.nanoTime() - superpositionStart;
+        int secondsVal = (3 - (int) (timeSinceSuperStart/1000000000));
+
+        String superString = "";
+        superString = "Superposition in " + secondsVal;
+
+        canvas.drawText(superString, (float) mViewWidth *11/16, 100, text);
+        if (secondsVal <= 0) {
+            createSuperposition = false;
+            inSuperposition = true;
+            superCar = new SuperpositionCar(mCar, speed, carBitmap, position);
+        }
+    }
+
+    private void rewind(Canvas canvas, Paint alphaPaint) {
+        mJoystick.setIsPressed(false);
+        posIncrement = 0;
+        timeSinceRewindStart = System.nanoTime() - rewindStart;
+        int secondsVal = (3 - (int) (timeSinceRewindStart/1000000000));
+        int tempIntervalNum = (int) timeSinceRewindStart / 1000000;
+        float superCarPos = superCar.pos;
+        if (position > superCarPos && tempIntervalNum > intervalNum) {
+            position = position - ((tempIntervalNum-intervalNum)*((measurePos - superCarPos) / 3) / 1000);
+            intervalNum = tempIntervalNum;
+        }
+        // Static
+        canvas.drawBitmap(staticBitmap, 0, 0, alphaPaint);
+        if (secondsVal%2 != 0)
+            canvas.drawBitmap(rewindBitmap, (float) mViewWidth/2-(float)rewindBitmap.getWidth()/2, (float) mViewHeight/2-(float)rewindBitmap.getHeight()/2, new Paint());
+        if (secondsVal <= 0) {
+            posIncrement = speed*-1;
+            probTotal = 50;
+            rewindBool = false;
+            mCar = new CarSprite(20, (int) superCar.top, 20+carBitmap.getWidth(), (int) superCar.bottom,0 ,0, carBitmap);
+            position = superCarPos;
+            lastDecoPosition = position;
+        }
+    }
+
+    private void measure(Canvas canvas, Paint text) {
+        timeSinceMeasureStart = System.nanoTime() - measurementStart;
+        int secondsVal = (3 - (int) (timeSinceMeasureStart/1000000000));
+
+        String measureString = "";
+        measureString = "Measurement in " + secondsVal;
+
+
+        canvas.drawText(measureString, (float) mViewWidth *11/16, 100, text);
+
+        if (secondsVal <= 0) {
+            createMeasurement = false;
+            inSuperposition = false;
+            double measurement = Math.random() * 100;
+            if (measurement < probTotal) {
+                if (decoArray.size() > 0) {
+                    decoArray.subList(0, decoArray.size()).clear();
+                }
+            }
+            else {
+                measurePos = position;
+                rewindBool = true;
+                rewindStart = System.nanoTime();
+            }
+            probTotal = 50;
+            probArray.subList(0, probArray.size()).clear();
+        }
     }
 
 
@@ -237,9 +333,6 @@ public class GameView extends SurfaceView implements Runnable{
         long frameStartTime;
         long frameTime;
         final int FPS = 60;
-        int decoRand = (int)(Math.random() * 10);
-        int prevPosition = position;
-        boolean createSuperposition = false;
         Paint text = new Paint();
         text.setTextSize(55);
         Typeface typeface = ResourcesCompat.getFont(mContext, R.font.goldman_bold);
@@ -250,10 +343,16 @@ public class GameView extends SurfaceView implements Runnable{
         Paint alphaPaint = new Paint();
         alphaPaint.setAlpha(60);
 
+        Paint empty = new Paint();
+        empty.setStyle(Paint.Style.STROKE);
+        empty.setStrokeWidth(5);
+
+        Paint filled = new Paint();
+
         // Running stuff
         while(mRunning) {
             if (mSurfaceHolder.getSurface().isValid()) {
-                this.position += speed * -1; // update position
+                this.position += posIncrement; // update position
 //                System.out.println("Current Position: " + position);
                 // record start time for run
                 frameStartTime = System.nanoTime();
@@ -276,65 +375,78 @@ public class GameView extends SurfaceView implements Runnable{
                     mJoystick.update();
                 }
 
-                if (inSuperposition) {
-                    canvas.drawText("Probability of time-slow: " + probTotal, (float) mViewWidth*1/16, 100, text);
-                    canvas.drawText("Probability of reset to split: " + (100-probTotal), (float) mViewWidth*1/16, mViewHeight-50, text);
-                }
 
                 // Decoherence
                 for (int i = decoArray.size() - 1; i >= 0; i--){
                     decoArray.get(i).drawDecoherence(canvas);
-                    if (decoArray.get(i).updateOk(canvas) == false){
+                    if (!decoArray.get(i).updateOk(canvas)){
                         decoArray.remove(i);
                     }
                     // if car intersects decoherence, delete decoherence and make screen white with static
                     else if ((decoArray.get(i)).intersect(mCar)){
-                        decoScreen(canvas); // draw the deco screen
-                        decoScreenPosition = position;
+//                        decoScreen(canvas, position); // draw the deco screen
                         decoArray.remove(i);
+                        posIncrement = 2;
                         if (inSuperposition) {
-                            if (probTotal > 30) probTotal = 30;
-                            else probTotal -= 10;
+                            if (probTotal > 40)
+                                probTotal = ((int) (Math.random()*5))*10;
+                            else
+                                probTotal = ((int) (Math.random()*(probTotal/10)))*10;
+                        }
+                        if (decoScreenOn)
+                            decoTime += 0.5;
+                        else {
+                            decoScreenOn = true;
+                            decoScreenStartTime = System.nanoTime();
                         }
                     }
                 }
 
+                // Probability tokens
+                for (int i = probArray.size() - 1; i >= 0; i--){
+                    probArray.get(i).drawProbability(canvas);
+                    if (!probArray.get(i).updateOk(canvas)){
+                        probArray.remove(i);
+                    }
+                    // probability collide with car, delete it and add to probTotal
+                    else if ((probArray.get(i)).intersect(mCar)){
+                        probArray.remove(i);
+                        if (probTotal < 100)
+                            probTotal += dProb;
+                    }
+                }
+
+
+                // Deco Screen
+                if ((System.nanoTime() - decoScreenStartTime)/1000000000 < decoTime && !rewindBool) {
+                    decoScreen(canvas, decoScreenStartTime);
+                }
+                if ((System.nanoTime() - decoScreenStartTime)/1000000000 > decoTime && !rewindBool) {
+                    posIncrement = -1*speed;
+                    decoTime = 2;
+                    decoScreenOn = false;
+                }
+
                 // each 10 frames
-                if (position - lastDecoPosition > mViewWidth/10) {
-                    if (Math.random() * 50 < 4 && !(position > finLinePos)){
+                if (position - lastDecoPosition > decoWidth) {
+                    if (Math.random() * 50 < 4 && !(position > finLinePos) && !rewindBool){
                         generateDecoherenceProbability(canvas);
                         lastDecoPosition = position;
                     }
                 }
 
-                if (position - decoScreenPosition < 500) {
-                    decoScreen(canvas);
-                }
 
                 // Updating superposition
 
                 if (position - lastDecoPosition > decoWidth && !createSuperposition && !inSuperposition) {
-                    double superRand = (Math.random() * 500);
+                    double superRand = (Math.random() * 400);
                     if (superRand < 1) {
                         createSuperposition = true; // Determine whether to create superposition
                         superpositionStart = System.nanoTime();
                     }
                 }
                 if (createSuperposition && !inSuperposition) {
-
-                    timeSinceSuperStart = System.nanoTime() - superpositionStart;
-                    int secondsVal = (3 - (int) (timeSinceSuperStart/1000000000));
-                    System.out.println(timeSinceSuperStart/1000000000);
-
-                    String superString = "";
-                    superString = "Superposition in " + secondsVal;
-
-                    canvas.drawText(superString, (float) mViewWidth *11/16, 100, text);
-                    if (secondsVal <= 0) {
-                        createSuperposition = false;
-                        inSuperposition = true;
-                        superCar = new SuperpositionCar(mCar, speed, carBitmap, position);
-                    }
+                    superposition(canvas, text);
                 }
 
                 // Measurement
@@ -348,78 +460,36 @@ public class GameView extends SurfaceView implements Runnable{
                 }
 
                 if (createMeasurement && inSuperposition) {
-                    timeSinceMeasureStart = System.nanoTime() - measurementStart;
-                    int secondsVal = (3 - (int) (timeSinceMeasureStart/1000000000));
-                    System.out.println(timeSinceMeasureStart/1000000000);
-
-                    String measureString = "";
-                    measureString = "Measurement in " + secondsVal;
-
-
-                    canvas.drawText(measureString, (float) mViewWidth *11/16, 100, text);
-
-                    if (secondsVal <= 0) {
-                        createMeasurement = false;
-                        inSuperposition = false;
-                        double measurement = Math.random() * 100;
-                        probTotal = 50;
-                        if (measurement < probTotal) {
-                            slowDownStart = System.nanoTime();
-                            speed = -2;
-                        }
-                        else {
-                            rewind = true;
-                            position = superCar.pos;
-                        }
-                    }
+                    measure(canvas, text);
                 }
 
                 // Rewind
-                if(rewind) {
-                    mJoystick.setIsPressed(false);
-                    timeSinceMeasureStart = System.nanoTime() - measurementStart;
-                    int secondsVal = (8 - (int) (timeSinceMeasureStart/1000000000));
-                    // Static
-                    canvas.drawBitmap(staticBitmap, 0, 0, alphaPaint);
-                    if (secondsVal%2 != 0)
-                        canvas.drawBitmap(rewindBitmap, (float) mViewWidth/2-(float)rewindBitmap.getWidth()/2, (float) mViewHeight/2-(float)rewindBitmap.getHeight()/2, new Paint());
-                    if (secondsVal <= 0) {
-                        probTotal = 50;
-                        rewind = false;
-                        mCar = new CarSprite(20, (int) superCar.top, 20+carBitmap.getWidth(), (int) superCar.bottom,0 ,0, carBitmap);
-                    }
+                if(rewindBool) {
+                    rewind(canvas, alphaPaint);
                 }
 
-                // Slow down
-                timeSinceSlowDownStart = System.nanoTime() - slowDownStart;
-                if (timeSinceSlowDownStart >= 5L *1000000000) {
-                    speed = -10;
-                }
-
-                // Probability
-                for (int i = probArray.size() - 1; i >= 0; i--){
-                    if (position - decoScreenPosition >= 500) {
-                        probArray.get(i).drawProbability(canvas);
-                    }
-                    if (probArray.get(i).updateOk(canvas) == false){
-                        probArray.remove(i);
-                    }
-                    // probability collide with car, delete it and add to probTotal
-                    else if ((probArray.get(i)).intersect(mCar)){
-                        probArray.remove(i);
-                        probTotal += dProb;
-                        System.out.println(probTotal);
-                    }
-                }
 
                 if (position > finLinePos) {
                     finSprite.drawFinishLine(canvas);
                     finSprite.updateOk(canvas);
 
 //                    if (position > finLinePos + mViewWidth) {
-                        finSprite.drawFinishLineScreen(canvas, mViewWidth, mViewHeight);
+                    finSprite.drawFinishLineScreen(canvas, mViewWidth, mViewHeight);
 //                    }
                 }
+
+
+                // Draw Progress
+                float progress = (float) position / finLinePos * (emptyProgress.width()-10);
+                filledProgress.right = filledProgress.left + progress;
+                canvas.drawRect(emptyProgress, empty);
+                canvas.drawRect(filledProgress, filled);
+
+                if (inSuperposition) {
+                    canvas.drawText("Probability of clear: " + probTotal, (float) mViewWidth*1/32, (float) mViewHeight*15/16, text);
+                    canvas.drawText("Probability of reset to split: " + (100-probTotal), (float) mViewWidth*8/16, (float) mViewHeight*15/16, text);
+                }
+
 
                 canvas.restore();
                 mSurfaceHolder.unlockCanvasAndPost(canvas);

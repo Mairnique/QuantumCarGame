@@ -38,7 +38,6 @@ public class ProbabilitySprite extends RectF{
     }
 
     public void drawProbability(Canvas canvas) {
-        System.out.println("DREW PROBABILITY");
         canvas.drawBitmap(probabilityImage, left,top, new Paint());
     }
 
