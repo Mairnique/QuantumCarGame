@@ -3,7 +3,7 @@
 ## Instructions
 ### Welcome to Quantum Racer!
 
-The car you will be driving is a **Quantum Car** that must race to colelct **quantum information** in the quantum world. Your job: to finish collecting all the information as fast as possible. Before you can begin though, you need to understand some of the quantum properties present in this game.
+The car you will be driving is a **Quantum Car** that must race to collect **quantum information** in the quantum world. Your job: to finish collecting all the information as fast as possible. Before you can begin though, you need to understand some of the quantum properties present in this game.
 
 ### 1. Superposition
 **Superposition** is a property that allows a quantum particle to exist in *two states at once*. Randomly throughout the game, your car will be sent into **superposition**. Upon doing so, your car will exist in two states simultaneously: one in a stationary state, and one able to continue moving.
