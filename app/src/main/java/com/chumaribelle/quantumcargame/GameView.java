@@ -148,7 +148,7 @@ public class GameView extends SurfaceView implements Runnable{
         finLinePos = 100000;
         posIncrement = speed*-1;
         decoTime = 2;
-        finLinePos = 10000;
+        finLinePos = 50000;
         frameTime = 0;
         startTime = 0;
         end = false;
