@@ -1,0 +1,126 @@
+Index: app/src/main/res/layout/activity_main.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    tools:context=\".MainActivity\">\r\n\r\n    <TextView\r\n        android:fontFamily=\"@font/goldman_bold\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:text=\"Hello World!\"\r\n        app:layout_constraintBottom_toBottomOf=\"parent\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintTop_toTopOf=\"parent\" />\r\n\r\n\r\n</androidx.constraintlayout.widget.ConstraintLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_main.xml b/app/src/main/res/layout/activity_main.xml
+--- a/app/src/main/res/layout/activity_main.xml	
++++ b/app/src/main/res/layout/activity_main.xml	
+@@ -6,15 +6,53 @@
+     android:layout_height="match_parent"
+     tools:context=".MainActivity">
+ 
+-    <TextView
+-        android:fontFamily="@font/goldman_bold"
++    <ImageView
++        android:id="@+id/image"
++        app:layout_constraintLeft_toLeftOf="parent"
++        app:layout_constraintTop_toTopOf="parent"
++        app:layout_constraintRight_toRightOf="parent"
++        app:layout_constraintBottom_toBottomOf="parent"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+-        android:text="Hello World!"
+-        app:layout_constraintBottom_toBottomOf="parent"
+-        app:layout_constraintEnd_toEndOf="parent"
+-        app:layout_constraintStart_toStartOf="parent"
+-        app:layout_constraintTop_toTopOf="parent" />
++        app:srcCompat="@drawable/finishline"/>
++    <Button
++        android:id="@+id/startButton"
++        app:layout_constraintLeft_toLeftOf="parent"
++        app:layout_constraintTop_toBottomOf="@+id/image"
++        app:layout_constraintRight_toRightOf="parent"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:text="Start"
++        android:textSize="34dp"
++        android:textColor="@android:color/black"
++        android:onClick="startGame"
++        />
++
++    <Button
++        android:id="@+id/instructions"
++        app:layout_constraintLeft_toLeftOf="parent"
++        app:layout_constraintTop_toBottomOf="@+id/startButton"
++        app:layout_constraintRight_toRightOf="parent"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:text="Instructions"
++        android:textSize="34dp"
++        android:textColor="@android:color/black"
++        android:onClick="startInstructions"
++        />
++
++    <Button
++        android:id="@+id/scores"
++        app:layout_constraintLeft_toLeftOf="parent"
++        app:layout_constraintTop_toBottomOf="@+id/instructions"
++        app:layout_constraintRight_toRightOf="parent"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:text="Scores"
++        android:textSize="34dp"
++        android:textColor="@android:color/black"
++        android:onClick="startScores"
++        />
+ 
+ 
+ </androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/scores.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/scores.xml b/app/src/main/res/layout/scores.xml
+new file mode 100644
+--- /dev/null	
++++ b/app/src/main/res/layout/scores.xml	
+@@ -0,0 +1,16 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent">
++
++    <ImageView
++        android:id="@+id/image"
++        app:layout_constraintLeft_toLeftOf="parent"
++        app:layout_constraintTop_toTopOf="parent"
++        app:layout_constraintRight_toRightOf="parent"
++        app:layout_constraintBottom_toBottomOf="parent"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        app:srcCompat="@drawable/finishline"/>
++
++</androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/instructions.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/instructions.xml b/app/src/main/res/layout/instructions.xml
+new file mode 100644
+--- /dev/null	
++++ b/app/src/main/res/layout/instructions.xml	
+@@ -0,0 +1,16 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent">
++
++    <ImageView
++        android:id="@+id/image"
++        app:layout_constraintLeft_toLeftOf="parent"
++        app:layout_constraintTop_toTopOf="parent"
++        app:layout_constraintRight_toRightOf="parent"
++        app:layout_constraintBottom_toBottomOf="parent"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        app:srcCompat="@drawable/racecar"/>
++
++</androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file

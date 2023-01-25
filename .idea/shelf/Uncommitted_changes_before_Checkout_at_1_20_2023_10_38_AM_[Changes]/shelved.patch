@@ -1,0 +1,24 @@
+Index: app/src/main/java/com/chumaribelle/quantumcargame/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.chumaribelle.quantumcargame;\r\n\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport android.content.pm.ActivityInfo;\r\nimport android.os.Bundle;\r\nimport android.view.View;\r\n\r\npublic class MainActivity extends AppCompatActivity {\r\n    private GameView mGameView;\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_main);\r\n        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);\r\n        mGameView = new GameView(this);\r\n        mGameView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);\r\n        setContentView(mGameView);\r\n    }\r\n\r\n    protected void onPause() {\r\n        super.onPause();\r\n        mGameView.pause();\r\n    }\r\n\r\n    @Override\r\n    protected void onResume() {\r\n        super.onResume();\r\n        mGameView.resume();\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/chumaribelle/quantumcargame/MainActivity.java b/app/src/main/java/com/chumaribelle/quantumcargame/MainActivity.java
+--- a/app/src/main/java/com/chumaribelle/quantumcargame/MainActivity.java	
++++ b/app/src/main/java/com/chumaribelle/quantumcargame/MainActivity.java	
+@@ -28,4 +28,12 @@
+         super.onResume();
+         mGameView.resume();
+     }
++
++//    public void startInstructions(View view) {
++//        setContentView(R.layout.instructions);
++//    }
++//
++//    public void startScores(View view) {
++//        setContentView(R.layout.scores);
++//    }
+ }
+\ No newline at end of file
