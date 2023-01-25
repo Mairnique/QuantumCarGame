@@ -110,6 +110,7 @@ public class GameView extends SurfaceView implements Runnable{
     // back button
     private boolean end;
     private RectF back;
+    private boolean reachedFinishLine;
 
     public GameView(Context context) {
         super(context);
@@ -479,17 +480,25 @@ public class GameView extends SurfaceView implements Runnable{
 
                 // each 10 frames
                 if (position - lastDecoPosition > decoWidth) {
-                    if (Math.random() * 50 < 4 && !(position > finLinePos) && !rewindBool){
+                    if (Math.random() * 50 < 4 && !(position > finLinePos) && !rewindBool && !reachedFinishLine){
                         generateDecoherenceProbability(canvas);
                         lastDecoPosition = position;
                     }
+                }
+
+                if (reachedFinishLine) {
+                    if (decoArray.size() > 0) {
+                        decoArray.subList(0, decoArray.size()).clear();
+                    }
+                    probArray.subList(0, probArray.size()).clear();
+
                 }
 
 
                 // Updating superposition
 
                 if (position - lastDecoPosition > decoWidth && !createSuperposition && !inSuperposition) {
-                    double superRand = (Math.random() * 400);
+                    double superRand = (Math.random() * 300);
                     if (superRand < 1) {
                         createSuperposition = true; // Determine whether to create superposition
                         superpositionStart = System.nanoTime();
@@ -527,6 +536,7 @@ public class GameView extends SurfaceView implements Runnable{
                     System.out.println("Reached FINLINE POS _______________________________________________________________");
                     if (finSprite.updateOk(canvas) != false) {
                         finSprite.drawFinishLine(canvas);
+                        reachedFinishLine = true;
                     }
                     System.out.println("END FINLINE POS _______________________________________________________________");
 
@@ -558,7 +568,7 @@ public class GameView extends SurfaceView implements Runnable{
                     editor.putString("two", Integer.toString(topScores.get(1))).commit();
                     editor.putString("three", Integer.toString(topScores.get(2))).commit();
                     finSprite.drawFinishLine(canvas);
-                    finSprite.drawFinText(canvas,mViewWidth,mViewHeight,gameoverBitmap,Integer.toString(finalTime));
+                    finSprite.drawFinText(canvas,mViewWidth,mViewHeight,gameoverBitmap,Integer.toString(finalTime), text);
 
 
                     end = true;
@@ -568,7 +578,7 @@ public class GameView extends SurfaceView implements Runnable{
                     System.out.println("end shared _______________________________________________________________");
 
 //                    if (position > finLinePos + mViewWidth) {
-                    finSprite.drawFinishLineScreen(canvas, mViewWidth, mViewHeight);
+//                    finSprite.drawFinishLineScreen(canvas, mViewWidth, mViewHeight);
 //                    }
                 }
 
@@ -579,10 +589,12 @@ public class GameView extends SurfaceView implements Runnable{
                 // Draw Progress
                 float progress = (float) position / finLinePos * (emptyProgress.width()-10);
                 filledProgress.right = filledProgress.left + progress;
-                canvas.drawRect(emptyProgress, empty);
-                canvas.drawRect(filledProgress, filled);
+                if (!end) {
+                    canvas.drawRect(emptyProgress, empty);
+                    canvas.drawRect(filledProgress, filled);
+                }
 
-                if (inSuperposition) {
+                if (inSuperposition && !end) {
                     canvas.drawText("Probability of clear: " + probTotal, (float) mViewWidth*1/32, (float) mViewHeight*15/16, text);
                     canvas.drawText("Probability of reset to split: " + (100-probTotal), (float) mViewWidth*8/16, (float) mViewHeight*15/16, text);
                 }

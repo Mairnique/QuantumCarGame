@@ -64,13 +64,12 @@ public class FinishLineSprite extends RectF {
 //        }
 //    }
 //
-    public void drawFinText(Canvas canvas, int width, int height, Bitmap gameover, String finalTime) {
+    public void drawFinText(Canvas canvas, int width, int height, Bitmap gameover, String finalTime, Paint text) {
         canvas.drawBitmap(gameover, (int)(width/2- gameover.getWidth()/2), (int) (height/2 - gameover.getHeight()/2), new Paint());
         // score text
-        String finalTimeString = "Your score was: " + finalTime;
-        Paint timeText = new Paint();
-        timeText.setTextSize(100);
-        canvas.drawText(finalTimeString, (float) width *2/8, 100, timeText);
+        String finalTimeString = "Your time was: " + finalTime;
+        text.setTextSize(100);
+        canvas.drawText(finalTimeString, (float) width *2/8, 100, text);
 //        canvas.drawBitmap(backButton, 0, 0, new Paint());
     }
 
