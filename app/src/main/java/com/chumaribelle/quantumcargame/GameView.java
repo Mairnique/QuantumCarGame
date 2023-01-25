@@ -1,6 +1,10 @@
 package com.chumaribelle.quantumcargame;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -11,15 +15,21 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.Toast;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GameView extends SurfaceView implements Runnable{
 
@@ -27,6 +37,11 @@ public class GameView extends SurfaceView implements Runnable{
 
     private SurfaceHolder mSurfaceHolder;
     Context mContext;
+    // shared preferences
+    String TAG = "com.chumaribelle.quantumcargame";
+    SharedPreferences.Editor editor;
+    SharedPreferences sharedPreferences;
+
     private int mViewWidth;
     private int mViewHeight;
     private CarSprite mCar;
@@ -59,6 +74,14 @@ public class GameView extends SurfaceView implements Runnable{
     private Bitmap finBitmap;
     private FinishLineSprite finSprite;
     private int finLinePos;
+    private Bitmap gameoverBitmap;
+    private FinishLineSprite gameoverSprite;
+    private Bitmap backBitmap;
+
+    // time
+    private int finalTime;
+    long frameTime;
+    private long startTime;
 
     private boolean inSuperposition;
     private long superpositionStart;
@@ -83,6 +106,10 @@ public class GameView extends SurfaceView implements Runnable{
     private int decoTime;
     private boolean decoScreenOn;
 
+
+    // back button
+    private boolean end;
+    private RectF back;
 
     public GameView(Context context) {
         super(context);
@@ -120,6 +147,16 @@ public class GameView extends SurfaceView implements Runnable{
         finLinePos = 100000;
         posIncrement = speed*-1;
         decoTime = 2;
+        finLinePos = 10000;
+        frameTime = 0;
+        startTime = 0;
+        end = false;
+
+        // load shared preferences
+        sharedPreferences = mContext.getSharedPreferences(TAG, MODE_PRIVATE);
+        // instantiate editor
+        editor = sharedPreferences.edit();
+
 
         // car bitmap
         carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.futureracecar);
@@ -145,8 +182,7 @@ public class GameView extends SurfaceView implements Runnable{
         // Finish Line Setup
         finBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.finishline);
         finBitmap = Bitmap.createScaledBitmap(finBitmap, mViewWidth / 8, mViewHeight, false);
-        finSprite = new FinishLineSprite(mViewWidth - mViewWidth / 8, 0, mViewWidth, mViewHeight, speed, Color.RED, finBitmap);
-
+        finSprite = new FinishLineSprite(mViewWidth - mViewWidth / 8, 0, mViewWidth, mViewHeight, speed, Color.RED, finBitmap, backBitmap);
         inSuperposition = false;
 
         // Rewind Image
@@ -160,6 +196,17 @@ public class GameView extends SurfaceView implements Runnable{
         // Progress Bar
         emptyProgress = new RectF((float) mViewWidth/32, (float) mViewHeight/32, (float) mViewWidth*10/16, (float) mViewHeight/8);
         filledProgress = new RectF(emptyProgress.left+5, emptyProgress.top+5, emptyProgress.left+5, emptyProgress.bottom-5);
+
+        // Game Over Setup
+        gameoverBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.gameover);
+        gameoverBitmap = Bitmap.createScaledBitmap(gameoverBitmap, mViewWidth/2, mViewHeight / 2, false);
+
+        // Back Button
+        back = new RectF(0, 0, 200, 200);
+        backBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.back);
+        backBitmap = Bitmap.createScaledBitmap(backBitmap, (int)back.width(), (int)back.height(), false);
+
+
     }
 
     public void pause() {
@@ -184,6 +231,10 @@ public class GameView extends SurfaceView implements Runnable{
                 mJoystick = new Joystick((int) event.getX(), (int) event.getY(), 120, 60);
                 if(mJoystick.isPressed(event.getX(), event.getY())) {
                     mJoystick.setIsPressed(true);
+                }
+                if (end == true && back.contains((int) event.getX(), (int) event.getY())){
+                    Intent i = new Intent(mContext, MainActivity.class);
+                    mContext.startActivity(i);
                 }
                 return true;
             case MotionEvent.ACTION_MOVE:
@@ -331,7 +382,6 @@ public class GameView extends SurfaceView implements Runnable{
         // Variables
         Canvas canvas;
         long frameStartTime;
-        long frameTime;
         final int FPS = 60;
         Paint text = new Paint();
         text.setTextSize(55);
@@ -469,14 +519,61 @@ public class GameView extends SurfaceView implements Runnable{
                 }
 
 
+
+                // Finish Line Animations
+                if (position > finLinePos - (mViewWidth - finSprite.width())) {
+
+                    // fin line animations
+                    System.out.println("Reached FINLINE POS _______________________________________________________________");
+                    if (finSprite.updateOk(canvas) != false) {
+                        finSprite.drawFinishLine(canvas);
+                    }
+                    System.out.println("END FINLINE POS _______________________________________________________________");
+
+                }
+
+                // update shared preferences
                 if (position > finLinePos) {
+                    System.out.println("start shared _______________________________________________________________");
+
+                    // variables
+                    int first = Integer.parseInt(sharedPreferences.getString("one", Integer.toString(Integer.MAX_VALUE)));
+                    int second = Integer.parseInt(sharedPreferences.getString("two", Integer.toString(Integer.MAX_VALUE)));
+                    int third = Integer.parseInt(sharedPreferences.getString("three", Integer.toString(Integer.MAX_VALUE)));
+                    ArrayList<Integer> topScores = new ArrayList<Integer>(Arrays.asList(first, second, third));
+
+                    finalTime = (int) (frameTime - startTime);
+                    System.out.println("FINAL TIME: " + finalTime);
+                    System.out.println("FRAME TIME: " + frameTime);
+                    System.out.println("START TIME: " + startTime);
+
+
+                    for (int i = 0; i < topScores.size(); i++){
+                        if (finalTime < topScores.get(i)) {
+                            topScores.add(i, finalTime);
+                            break;
+                        }
+                    }
+                    editor.putString("one", Integer.toString(topScores.get(0))).commit();
+                    editor.putString("two", Integer.toString(topScores.get(1))).commit();
+                    editor.putString("three", Integer.toString(topScores.get(2))).commit();
                     finSprite.drawFinishLine(canvas);
-                    finSprite.updateOk(canvas);
+                    finSprite.drawFinText(canvas,mViewWidth,mViewHeight,gameoverBitmap,Integer.toString(finalTime));
+
+
+                    end = true;
+                    canvas.drawBitmap(backBitmap, null, back, new Paint());
+
+                    mRunning = false;
+                    System.out.println("end shared _______________________________________________________________");
 
 //                    if (position > finLinePos + mViewWidth) {
                     finSprite.drawFinishLineScreen(canvas, mViewWidth, mViewHeight);
 //                    }
                 }
+
+
+
 
 
                 // Draw Progress
@@ -505,6 +602,4 @@ public class GameView extends SurfaceView implements Runnable{
             }
         }
     }
-
-
 }

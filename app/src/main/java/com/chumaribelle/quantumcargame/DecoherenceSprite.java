@@ -31,7 +31,7 @@ public class DecoherenceSprite extends RectF {
 
     //  ********* MOVEMENT METHODS ********************
     public boolean updateOk(Canvas canvas) {
-            if(left - dX <= 0){
+            if(left + dX <= 0){
                 return false;
             }
             offset(dX, 0);

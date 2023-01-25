@@ -1,0 +1,77 @@
+Index: app/src/main/java/com/chumaribelle/quantumcargame/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.chumaribelle.quantumcargame;\r\n\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport android.content.pm.ActivityInfo;\r\nimport android.os.Bundle;\r\nimport android.view.View;\r\n\r\npublic class MainActivity extends AppCompatActivity {\r\n    private GameView mGameView;\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_main);\r\n        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);\r\n        mGameView = new GameView(this);\r\n        mGameView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);\r\n        setContentView(mGameView);\r\n    }\r\n\r\n    protected void onPause() {\r\n        super.onPause();\r\n        mGameView.pause();\r\n    }\r\n\r\n    @Override\r\n    protected void onResume() {\r\n        super.onResume();\r\n        mGameView.resume();\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/chumaribelle/quantumcargame/MainActivity.java b/app/src/main/java/com/chumaribelle/quantumcargame/MainActivity.java
+--- a/app/src/main/java/com/chumaribelle/quantumcargame/MainActivity.java	(revision 5d6417fa3afbd7566372f566b63c8bfcc9b010ee)
++++ b/app/src/main/java/com/chumaribelle/quantumcargame/MainActivity.java	(date 1674229364648)
+@@ -12,10 +12,10 @@
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_main);
+-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+-        mGameView = new GameView(this);
+-        mGameView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+-        setContentView(mGameView);
++//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
++//        mGameView = new GameView(this);
++//        mGameView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
++//        setContentView(mGameView);
+     }
+ 
+     protected void onPause() {
+Index: .idea/shelf/Uncommitted_changes_before_Update_at_1_11_2023_11_40_AM__Changes_.xml
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Update_at_1_11_2023_11_40_AM__Changes_.xml b/.idea/shelf/Uncommitted_changes_before_Update_at_1_11_2023_11_40_AM__Changes_.xml
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Update_at_1_11_2023_11_40_AM__Changes_.xml	(revision 5d6417fa3afbd7566372f566b63c8bfcc9b010ee)
++++ /dev/null	(revision 5d6417fa3afbd7566372f566b63c8bfcc9b010ee)
+@@ -1,4 +0,0 @@
+-<changelist name="Uncommitted_changes_before_Update_at_1_11_2023_11_40_AM_[Changes]" date="1673455305472" recycled="true" deleted="true">
+-  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_1_11_2023_11_40_AM_[Changes]/shelved.patch" />
+-  <option name="DESCRIPTION" value="Uncommitted changes before Update at 1/11/2023 11:40 AM [Changes]" />
+-</changelist>
+\ No newline at end of file
+Index: .idea/shelf/Uncommitted_changes_before_Update_at_1_11_2023_11_40_AM_[Changes]/shelved.patch
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Update_at_1_11_2023_11_40_AM_[Changes]/shelved.patch b/.idea/shelf/Uncommitted_changes_before_Update_at_1_11_2023_11_40_AM_[Changes]/shelved.patch
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Update_at_1_11_2023_11_40_AM_[Changes]/shelved.patch	(revision 5d6417fa3afbd7566372f566b63c8bfcc9b010ee)
++++ /dev/null	(revision 5d6417fa3afbd7566372f566b63c8bfcc9b010ee)
+@@ -1,18 +0,0 @@
+-Index: app/src/main/java/com/chumaribelle/quantumcargame/GameView.java
+-IDEA additional info:
+-Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+-<+>package com.chumaribelle.quantumcargame;\r\n\r\nimport android.content.Context;\r\nimport android.graphics.Bitmap;\r\nimport android.graphics.BitmapFactory;\r\nimport android.graphics.Canvas;\r\nimport android.graphics.Color;\r\nimport android.graphics.Paint;\r\nimport android.graphics.Path;\r\nimport android.graphics.RectF;\r\nimport android.graphics.Region;\r\nimport android.util.AttributeSet;\r\nimport android.view.MotionEvent;\r\nimport android.view.SurfaceHolder;\r\nimport android.view.SurfaceView;\r\n\r\nimport androidx.annotation.NonNull;\r\n\r\nimport java.util.ArrayList;\r\n\r\npublic class GameView extends SurfaceView implements Runnable{\r\n\r\n    public static final double MAX_UPS = 30.0;\r\n\r\n    private SurfaceHolder mSurfaceHolder;\r\n    Context mContext;\r\n    private int mViewWidth;\r\n    private int mViewHeight;\r\n    private CarSprite mCar;\r\n    private Bitmap carBitmap;\r\n    private SuperpositionCar superCar;\r\n    private boolean mRunning;\r\n    private Thread mGameThread;\r\n    private Paint mPaint;\r\n    private Path mPath;\r\n    private Joystick mJoystick;\r\n    private RectF mBoundary;\r\n    private DecoherenceSprite mDecoherence;\r\n    private int position;\r\n    private int lastDecoPosition;\r\n    private Bitmap decoBitmap;\r\n    private ArrayList<DecoherenceSprite> decoArray;\r\n    private int speed;\r\n    private int decoWidth;\r\n\r\n    boolean inSuperposition;\r\n    long superpositionStart;\r\n    long timeSinceSuperStart;\r\n\r\n    public GameView(Context context) {\r\n        super(context);\r\n        init(context);\r\n    }\r\n\r\n    public GameView(Context context, AttributeSet attrs) {\r\n        super(context, attrs);\r\n        init(context);\r\n    }\r\n\r\n    public GameView(Context context, AttributeSet attrs, int defStyleAttr) {\r\n        super(context, attrs, defStyleAttr);\r\n        init(context);\r\n        mSurfaceHolder = getHolder();\r\n    }\r\n\r\n    public void init(Context context) {\r\n        mContext = context;\r\n        mSurfaceHolder = getHolder();\r\n        setFocusable(true);\r\n        mPaint = new Paint();\r\n    }\r\n\r\n\r\n    @Override\r\n    protected void onSizeChanged(int w, int h, int oldw, int oldh) {\r\n        super.onSizeChanged(w, h, oldw, oldh);\r\n        mViewWidth = w;\r\n        mViewHeight = h;\r\n        speed = -5;\r\n        decoWidth = (int) (mViewWidth/16);\r\n\r\n        carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.racecar);\r\n        carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/8.5), (int) (mViewHeight/10), false);\r\n        mCar = new CarSprite(20, (mViewHeight/2)-(carBitmap.getHeight()/2), 20+carBitmap.getWidth(),\r\n                (mViewHeight/2)+(carBitmap.getHeight()/2), 0, 0, carBitmap);\r\n        mJoystick = new Joystick(200, mViewHeight-200, 150, 40);\r\n        mBoundary = new RectF(0,\r\n                mViewHeight/7,\r\n                mViewWidth,\r\n                mViewHeight*6/7);\r\n\r\n        // Decoherence Setup\r\n        decoBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.decoherence);\r\n        decoBitmap = Bitmap.createScaledBitmap(decoBitmap, decoWidth, decoWidth, false);\r\n\r\n        decoArray = new ArrayList<>();\r\n\r\n        inSuperposition = false;\r\n    }\r\n\r\n\r\n    public void pause() {\r\n        mRunning = false;\r\n        try {\r\n            // Stop the thread (rejoin the main thread)\r\n            mGameThread.join();\r\n        } catch (InterruptedException e) {\r\n        }\r\n    }\r\n\r\n    public void resume() {\r\n        mRunning = true;\r\n        mGameThread = new Thread(this);\r\n        mGameThread.start();\r\n    }\r\n\r\n    public boolean onTouchEvent(MotionEvent event) {\r\n\r\n        switch(event.getAction()) {\r\n            case MotionEvent.ACTION_DOWN:\r\n                mJoystick = new Joystick((int) event.getX(), (int) event.getY(), 120, 60);\r\n                if(mJoystick.isPressed(event.getX(), event.getY())) {\r\n                    mJoystick.setIsPressed(true);\r\n                }\r\n                return true;\r\n            case MotionEvent.ACTION_MOVE:\r\n                if(mJoystick.getIsPressed()) {\r\n                    mJoystick.setStick(event.getX(), event.getY());\r\n                }\r\n                return true;\r\n            case MotionEvent.ACTION_UP:\r\n                mJoystick.setIsPressed(false);\r\n                mJoystick.resetStick();\r\n                return true;\r\n        }\r\n        return super.onTouchEvent(event);\r\n    }\r\n\r\n    public void drawBackground(Canvas canvas) {\r\n        // Grass\r\n        mPaint.setColor(Color.GREEN);\r\n        canvas.drawRect(0,0,mViewWidth,(float) mViewHeight/7, mPaint);\r\n        canvas.drawRect(0, (float) mViewHeight*6/7, mViewWidth, mViewHeight, mPaint);\r\n\r\n        // Road\r\n        mPaint.setColor(Color.GRAY);\r\n        canvas.drawRect(0, (float) mViewHeight/7, mViewWidth, (float) mViewHeight*6/7, mPaint);\r\n\r\n        // Lane Markers\r\n        mPaint.setColor(Color.WHITE);\r\n        for(int i=2; i<6; i++) {\r\n            float top = (float) mViewHeight/7*i-5;\r\n            float bottom = top+10;\r\n            for(int j=0; j<=10; j++) {\r\n                float left = (float) mViewWidth/10*j + (float) mViewWidth/20;\r\n                float right = left+25;\r\n                canvas.drawRect(left, top, right, bottom, mPaint);\r\n            }\r\n        }\r\n    }\r\n\r\n    private void generateDecoherence(Canvas canvas) {\r\n        System.out.println(\"HEY\");\r\n        int y = 0;\r\n        for (int i = 0; i < 5; i++){\r\n            y += mViewHeight/7;\r\n            if (Math.random() * 50 < 25) {\r\n                DecoherenceSprite deco = new DecoherenceSprite(mViewWidth,y - 25,mViewWidth - 50,y + 25,-5, Color.RED, decoBitmap);\r\n                decoArray.add(deco); // saved decoherence to array\r\n                deco.drawDecoherence(canvas);\r\n            }\r\n        }\r\n    }\r\n\r\n\r\n    @Override\r\n    public void run() {\r\n        // Variables\r\n        Canvas canvas;\r\n        long frameStartTime;\r\n        long frameTime;\r\n        final int FPS = 60;\r\n        int prevPosition = position;\r\n        boolean createSuperposition = false;\r\n\r\n\r\n        // Running stuff\r\n        while(mRunning) {\r\n            if (mSurfaceHolder.getSurface().isValid()) {\r\n                this.position += speed * -1; // update position\r\n\r\n                // record start time for run\r\n                frameStartTime = System.nanoTime();\r\n\r\n                canvas = mSurfaceHolder.lockCanvas();\r\n                canvas.save();\r\n\r\n                drawBackground(canvas);\r\n\r\n                mCar.draw(canvas);\r\n                mCar.update(mJoystick, mBoundary);\r\n\r\n                if(inSuperposition && superCar.inBounds) {\r\n                    superCar.draw(canvas);\r\n                    superCar.update(mBoundary);\r\n                }\r\n\r\n                if(mJoystick.getIsPressed()) {\r\n                    mJoystick.draw(canvas);\r\n                    mJoystick.update();\r\n                }\r\n\r\n                // Decoherence\r\n                for (int i = decoArray.size() - 1; i >= 0; i--){\r\n                    decoArray.get(i).drawDecoherence(canvas);\r\n                    if (decoArray.get(i).updateOk(canvas) == false){\r\n                        decoArray.remove(i);\r\n                    }\r\n                }\r\n                if (position - lastDecoPosition > decoWidth) {\r\n                    int decoRand = (int)(Math.random()*50);\r\n                    if (decoRand < 25){\r\n                        System.out.println(\"HEYYYY\");\r\n                        generateDecoherence(canvas);\r\n                        lastDecoPosition = position;\r\n                    }\r\n                }\r\n                // End Decoherence\r\n\r\n                // Updating superposition\r\n                if (position - lastDecoPosition > decoWidth && !createSuperposition && !inSuperposition) {\r\n                    double superRand = (Math.random() * 500);\r\n                    if (superRand < 5) {\r\n                        createSuperposition = true; // Determine whether to create superposition\r\n                        superpositionStart = System.nanoTime();\r\n                    }\r\n                }\r\n                if (createSuperposition && !inSuperposition) {\r\n\r\n                    timeSinceSuperStart = System.nanoTime() - superpositionStart;\r\n                    int secondsVal = (3 - (int) (timeSinceSuperStart/1000000000));\r\n                    System.out.println(timeSinceSuperStart/1000000000);\r\n                    if (secondsVal <= 0) {\r\n                        createSuperposition = false;\r\n                        inSuperposition = true;\r\n                        superCar = new SuperpositionCar(mCar, speed, carBitmap, position);\r\n                    }\r\n                    String superString = \"\";\r\n                    superString = \"Superposition in \" + secondsVal;\r\n\r\n                    Paint text = new Paint();\r\n                    text.setTextSize(50);\r\n                    canvas.drawText(superString, (float) mViewWidth *6/8, 100, text);\r\n                }\r\n\r\n\r\n\r\n                canvas.restore();\r\n                mSurfaceHolder.unlockCanvasAndPost(canvas);\r\n\r\n                frameTime = (System.nanoTime() - frameStartTime) / 1000000;\r\n\r\n                if (frameTime < (1000/FPS)) // if faster than the FPS -> wait until FPS matched\r\n                {\r\n                    try {\r\n                        Thread.sleep((int)(1000/FPS) - frameTime);\r\n                    } catch (InterruptedException e) {}\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n\r\n}
+-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+-<+>UTF-8
+-===================================================================
+-diff --git a/app/src/main/java/com/chumaribelle/quantumcargame/GameView.java b/app/src/main/java/com/chumaribelle/quantumcargame/GameView.java
+---- a/app/src/main/java/com/chumaribelle/quantumcargame/GameView.java	(revision 3e5802a5faedc9625df15d356e902dd3f09cc176)
+-+++ b/app/src/main/java/com/chumaribelle/quantumcargame/GameView.java	(date 1673455229023)
+-@@ -220,7 +220,6 @@
+-                 if (position - lastDecoPosition > decoWidth) {
+-                     int decoRand = (int)(Math.random()*50);
+-                     if (decoRand < 25){
+--                        System.out.println("HEYYYY");
+-                         generateDecoherence(canvas);
+-                         lastDecoPosition = position;
+-                     }
+Index: app/src/main/res/values/ids.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/values/ids.xml b/app/src/main/res/values/ids.xml
+new file mode 100644
+--- /dev/null	(date 1674229263711)
++++ b/app/src/main/res/values/ids.xml	(date 1674229263711)
+@@ -0,0 +1,4 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <item name="startButton" type="id" />
++</resources>
+\ No newline at end of file
