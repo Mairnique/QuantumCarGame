@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    
+    android:background="#353535"
     tools:context=".MainActivity">
 
 
@@ -17,7 +17,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.086"
-        app:srcCompat="@drawable/racecar" />
+        app:srcCompat="@drawable/futureracecar" />
 
     <Button
         android:id="@+id/startButton"
@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:text="Start"
         android:textSize="34dp"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:onClick="startGame"
         />
 
@@ -42,7 +42,7 @@
         android:layout_height="wrap_content"
         android:text="Instructions"
         android:textSize="34dp"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:onClick="startInstructions"
         />
 
@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:text="Scores"
         android:textSize="34dp"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:onClick="startScores"
         />
 

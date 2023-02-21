@@ -16,7 +16,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/finishline"/>
+        app:srcCompat="@drawable/futureracecar"/>
     <Button
         android:id="@+id/startButton"
         app:layout_constraintLeft_toLeftOf="parent"

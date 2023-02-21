@@ -145,13 +145,12 @@ public class GameView extends SurfaceView implements Runnable{
         probWidth = (int) (mViewWidth/20);
         probTotal = 50;
         dProb = 10;
-        finLinePos = 100000;
         posIncrement = speed*-1;
         decoTime = 2;
         finLinePos = 50000;
         frameTime = 0;
-        startTime = 0;
         end = false;
+        startTime = System.nanoTime();
 
         // load shared preferences
         sharedPreferences = mContext.getSharedPreferences(TAG, MODE_PRIVATE);
@@ -552,8 +551,9 @@ public class GameView extends SurfaceView implements Runnable{
                     int third = Integer.parseInt(sharedPreferences.getString("three", Integer.toString(Integer.MAX_VALUE)));
                     ArrayList<Integer> topScores = new ArrayList<Integer>(Arrays.asList(first, second, third));
 
-                    finalTime = (int) (frameTime - startTime);
+                    finalTime = (int) ((System.nanoTime() - startTime)/1000000000);
                     System.out.println("FINAL TIME: " + finalTime);
+                    System.out.println("CURRENT TIME: " + System.nanoTime());
                     System.out.println("FRAME TIME: " + frameTime);
                     System.out.println("START TIME: " + startTime);
 

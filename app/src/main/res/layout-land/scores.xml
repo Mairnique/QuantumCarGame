@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#353535"
     tools:context=".MainActivity"
     android:id="@+id/scores">
 
@@ -13,8 +14,10 @@
         android:layout_height="50dp"
         android:gravity="center"
         android:tag="topLeft"
+        android:fontFamily="@font/goldman_bold"
         android:text="1: "
         android:textSize="30dp"
+        android:textColor="@color/light_blue"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -25,8 +28,10 @@
         android:gravity="center"
         app:layout_constraintVertical_bias=".5"
         android:tag="topLeft"
+        android:fontFamily="@font/goldman_bold"
         android:text="2: "
         android:textSize="30dp"
+        android:textColor="@color/light_blue"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -39,6 +44,8 @@
         android:layout_height="50dp"
         android:gravity="center"
         android:tag="topLeft"
+        android:fontFamily="@font/goldman_bold"
+        android:textColor="@color/light_blue"
         android:text="3: "
         android:textSize="30dp"
         app:layout_constraintLeft_toLeftOf="parent"

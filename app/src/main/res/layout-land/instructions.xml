@@ -4,9 +4,149 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#353535"
     tools:context=".MainActivity">
+    
 
-
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/purple_200"
+                android:layout_gravity="center_horizontal"
+                android:textAlignment="center"
+                android:text="Welcome to Quantum Racer!"
+                android:textSize="30sp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/light_blue"
+                android:paddingHorizontal="15dp"
+                android:layout_gravity="center_horizontal"
+                android:textAlignment="center"
+                android:text="How to play: Avoid the obstacles and reach the end as fast as you can!"
+                android:textSize="22sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/white"
+                android:paddingHorizontal="15dp"
+                android:text="The car you will be driving is a Quantum Car that must race to collect quantum information in the quantum world. Your job: to finish collecting all the information as fast as possible. Before you can begin though, you need to understand some of the quantum properties present in this game."
+                android:textSize="20sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/purple_200"
+                android:layout_gravity="center_horizontal"
+                android:textAlignment="center"
+                android:text="1. Superposition"
+                android:textSize="26sp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/white"
+                android:paddingHorizontal="15dp"
+                android:text="Superposition is a property that allows a quantum particle to exist in two states at once. Randomly throughout the game, your car will be sent into superposition. Upon doing so, your car will exist in two states simultaneously: one in a stationary state, and one able to continue moving."
+                android:textSize="20sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/purple_200"
+                android:layout_gravity="center_horizontal"
+                android:textAlignment="center"
+                android:text="2. Quantum Measurement"
+                android:textSize="26sp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/white"
+                android:paddingHorizontal="15dp"
+                android:text="Quantum Measurement is different from classical measurement because it collapses superpositions back to base states. Randomly after being put into superposition, your car will be measured. When measured, the car will be forced back to one of two states: either the stationary car, or the moving car. If the stationary car is measured, your car will be sent all the way back to the position where the superposition was initially created; however, if the moving car is measured, all obstacles on the track will be cleared."
+                android:textSize="20sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/purple_200"
+                android:layout_gravity="center_horizontal"
+                android:textAlignment="center"
+                android:text="3. Probability"
+                android:textSize="26sp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/white"
+                android:paddingHorizontal="15dp"
+                android:text="States in superposition can be altered to have higher contributions of one state than another. When measured, the state with the higher contribution will have a higher probability of being the measured state. After being put into superposition, probability tokens will generate, increasing the contribution of the moving car's state. Therefore, when measured, your car will have a probability of being measured into the moving state, clearing all obstacles on the track."
+                android:textSize="20sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/purple_200"
+                android:layout_gravity="center_horizontal"
+                android:textAlignment="center"
+                android:text="4. Noise and Decoherence"
+                android:textSize="26sp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/white"
+                android:paddingHorizontal="15dp"
+                android:text="Quantum decoherence and noise are the biggest limiting factors on modern quantum hardware. Quantum decoherence is the loss of quantum information. Throughout the game, if your car collides with a decohering particle, your quantum information collection will slow. Noise jumbles quantum states. If your car collides with these noise particles, your visibility will be reduced. When in superposition, these particles will also randomly change your probability of measuring the state you want. Be careful!"
+                android:textSize="20sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/light_blue"
+                android:paddingHorizontal="15dp"
+                android:text="Hopefully, you understood a little more about the quantum world through these explanations. If not, give the game a go! You will come to understand the more you play. With that said, start driving your quantum car, and collect that quantum information the world so desperately needs!"
+                android:textSize="22sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/purple_200"
+                android:layout_gravity="center_horizontal"
+                android:textAlignment="center"
+                android:paddingTop="25dp"
+                android:text="About the Game"
+                android:textSize="30sp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/goldman_bold"
+                android:textColor="@color/light_blue"
+                android:paddingHorizontal="15dp"
+                android:text="Quantum Racer was created by Maribelle Chu and Karthik Thyagarajan for International Quantum Day. The intention of this game is to teach those who don't know much about quantum mechanics a little bit more, maybe to pique their curiousity or just to have fun. The game is designed to be a simple game once you understand how to play, but users can attempt to get personal bests multiple times if desired. Hope everyone enjoys!"
+                android:textSize="20sp"/>
+        </LinearLayout>
+    </ScrollView>
     <ImageButton
         android:id="@+id/imageButton"
         android:layout_width="wrap_content"
@@ -16,38 +156,5 @@
         app:layout_constraintLeft_toLeftOf="parent"
         android:background="@color/black"
         android:onClick="startScreen" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/imageButton"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:text=""/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintTop_toBottomOf="@id/imageButton"
-        android:fontFamily="@font/goldman_bold"
-        android:text="Quantum Racer
-Instructions
-Welcome to Quantum Racer!
-The car you will be driving is a Quantum Car that must race to collect quantum information in the quantum world. Your job: to finish collecting all the information as fast as possible. Before you can begin though, you need to understand some of the quantum properties present in this game.
-
-1. Superposition
-Superposition is a property that allows a quantum particle to exist in two states at once. Randomly throughout the game, your car will be sent into superposition. Upon doing so, your car will exist in two states simultaneously: one in a stationary state, and one able to continue moving.
-
-2. Quantum Measurement
-Quantum Measurement is different from classical measurement because it collapses superpositions back to base states. Randomly after being put into superposition, your car will be measured. When measured, the car will be forced back to one of two states: either the stationary car, or the moving car. If the stationary car is measured, your car will be sent all the way back to the position where the superposition was initially created; however, if the moving car is measured, all obstacles on the track will be cleared.
-
-3. Probability
-States in superposition can be altered to have higher contributions of one state than another. When measured, the state with the higher contribution will have a higher probability of being the measured state. After being put into superposition, probability tokens will generate, increasing the contribution of the moving car's state. Therefore, when measured, your car will have a probability of being measured into the moving state, clearing all obstacles on the track.
-
-4. Noise and Decoherence
-Quantum decoherence and noise are the biggest limiting factors on modern quantum hardware. Quantum decoherence is the loss of quantum information. Throughout the game, if your car collides with a decohering particle, your quantum information collection will slow. Noise jumbles quantum states. If your car collides with these noise particles, your visibility will be reduced. When in superposition, these particles will also randomly change your probability of measuring the state you want. Be careful!
-
-Hopefully, you understood a little more about the quantum world through these explanations. If not, give the game a go! You will come to understand the more you play. With that said, start driving your quantum car, and collect that quantum information the world so desperately needs!
-About the game
-Quantum Racer was created by Maribelle Chu and Karthik Thyagarajan for International Quantum Day. The intention of this game is to teach those who don't know much about quantum mechanics a little bit more, maybe to pique their curiousity or just to have fun. The game is designed to be a simple game once you understand how to play, but users can attempt to get personal bests multiple times if desired. Hope everyone enjoys!"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
