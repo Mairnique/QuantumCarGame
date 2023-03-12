@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     }
     public void startGame(View view) {
         mGameView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+        mGameView.setStartTime(System.nanoTime());
+        mGameView.setKeepScreenOn(true);
         setContentView(mGameView);
     }
 
@@ -71,8 +73,12 @@ public class MainActivity extends AppCompatActivity {
         two = findViewById(R.id.two);
         three = findViewById(R.id.three);
 
-        one.setText("FIRST: "+ sharedPreferences.getString("one", Integer.toString(Integer.MAX_VALUE)));
-        two.setText("SECOND: "+ sharedPreferences.getString("two", Integer.toString(Integer.MAX_VALUE)));
-        three.setText("THIRD: "+ sharedPreferences.getString("three", Integer.toString(Integer.MAX_VALUE)));
+        one.setText("FIRST: "+ sharedPreferences.getString("one", "None"));
+        two.setText("SECOND: "+ sharedPreferences.getString("two",  "None"));
+        three.setText("THIRD: "+ sharedPreferences.getString("three", "None"));
+    }
+
+    public void resetScores(View view) {
+        editor.clear().commit();
     }
 }

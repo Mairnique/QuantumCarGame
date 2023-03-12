@@ -12,7 +12,7 @@ public class SuperpositionCar extends CarSprite {
     float top, bottom;
 
     public SuperpositionCar(CarSprite car, float dX, Bitmap bitmap, float pos) {
-        super((int) car.left, (int) car.top, (int) car.right, (int) car.bottom, dX, 0, bitmap);
+        super((int) car.left, (int) car.top, (int) car.right, (int) car.bottom, dX, 0, bitmap, 0);
         top = car.top;
         bottom = car.bottom;
         this.pos = pos;

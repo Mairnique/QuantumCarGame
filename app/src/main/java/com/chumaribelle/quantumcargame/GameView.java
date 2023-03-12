@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -105,12 +106,15 @@ public class GameView extends SurfaceView implements Runnable{
     private float timeSinceRewindStart;
     private int decoTime;
     private boolean decoScreenOn;
-
+    private long clearStartTime;
 
     // back button
     private boolean end;
     private RectF back;
     private boolean reachedFinishLine;
+
+    private Paint text;
+    private Paint whiteText;
 
     public GameView(Context context) {
         super(context);
@@ -140,17 +144,17 @@ public class GameView extends SurfaceView implements Runnable{
         super.onSizeChanged(w, h, oldw, oldh);
         mViewWidth = w;
         mViewHeight = h;
-        speed = -10;
+        speed = -1*(int) (mViewWidth/150);
         decoWidth = (int) (mViewWidth/18);
         probWidth = (int) (mViewWidth/20);
         probTotal = 50;
         dProb = 10;
         posIncrement = speed*-1;
         decoTime = 2;
-        finLinePos = 50000;
+        finLinePos = mViewWidth*50;
         frameTime = 0;
         end = false;
-        startTime = System.nanoTime();
+
 
         // load shared preferences
         sharedPreferences = mContext.getSharedPreferences(TAG, MODE_PRIVATE);
@@ -162,8 +166,8 @@ public class GameView extends SurfaceView implements Runnable{
         carBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.futureracecar);
         carBitmap = Bitmap.createScaledBitmap(carBitmap, (int) (mViewWidth/9.5), (int) (mViewHeight/12.5), false);
         mCar = new CarSprite(20, (mViewHeight/2)-(carBitmap.getHeight()/2), 20+carBitmap.getWidth(),
-                (mViewHeight/2)+(carBitmap.getHeight()/2), 0, 0, carBitmap);
-        mJoystick = new Joystick(200, mViewHeight-200, 150, 40);
+                (mViewHeight/2)+(carBitmap.getHeight()/2), 0, 0, carBitmap, (double) mViewWidth/5);
+        mJoystick = new Joystick(200, mViewHeight-200, mViewWidth/40, mViewWidth/120);
         mBoundary = new RectF(0,
                 mViewHeight/7,
                 mViewWidth,
@@ -206,7 +210,22 @@ public class GameView extends SurfaceView implements Runnable{
         backBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.back);
         backBitmap = Bitmap.createScaledBitmap(backBitmap, (int)back.width(), (int)back.height(), false);
 
+        text = new Paint();
+        text.setTextSize((float) (mViewWidth/40));
+        Typeface typeface = ResourcesCompat.getFont(mContext, R.font.goldman_bold);
+        text.setTypeface(typeface);
+        text.setTextAlign(Paint.Align.LEFT);
 
+        whiteText = new Paint();
+        whiteText.setTextSize((float) (mViewWidth/40));
+        whiteText.setTypeface(typeface);
+        whiteText.setTextAlign(Paint.Align.LEFT);
+        whiteText.setColor(Color.WHITE);
+
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 
     public void pause() {
@@ -228,7 +247,7 @@ public class GameView extends SurfaceView implements Runnable{
 
         switch(event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mJoystick = new Joystick((int) event.getX(), (int) event.getY(), 120, 60);
+                mJoystick = new Joystick((int) event.getX(), (int) event.getY(), mViewWidth/20, mViewWidth/50);
                 if(mJoystick.isPressed(event.getX(), event.getY())) {
                     mJoystick.setIsPressed(true);
                 }
@@ -257,8 +276,10 @@ public class GameView extends SurfaceView implements Runnable{
         canvas.drawRect(0, (float) mViewHeight*6/7, mViewWidth, mViewHeight, mPaint);
 
         // Road
-        mPaint.setColor(Color.rgb(53, 53, 53));
+        mPaint.setColor(Color.rgb(70, 70, 70));
         canvas.drawRect(0, (float) mViewHeight/7, mViewWidth, (float) mViewHeight*6/7, mPaint);
+
+
 
         // Lane Markers
         mPaint.setColor(Color.WHITE);
@@ -278,23 +299,34 @@ public class GameView extends SurfaceView implements Runnable{
         for (int i = 0; i < 5; i++){
             y += mViewHeight/7;
             if (inSuperposition) {
-                if (Math.random() * 50 < 6) {
+                if (Math.random() * 50 < 4) {
                     DecoherenceSprite deco = new DecoherenceSprite(mViewWidth, y, mViewWidth + decoWidth, y + decoWidth, speed, Color.RED, decoBitmap);
                     decoArray.add(deco); // saved decoherence to array
                     deco.drawDecoherence(canvas);
                 }
-                else if (Math.random() * 50 < 6) {
+                else if (Math.random() * 50 < 2.5) {
                     ProbabilitySprite prob = new ProbabilitySprite(mViewWidth,y ,mViewWidth + probWidth,y + probWidth,speed, Color.RED, probBitmap);
                     probArray.add(prob); // saved decoherence to array
                     prob.drawProbability(canvas);
                 }
             }
-            else if (Math.random() * 50 < 6) {
+            else if (Math.random() * 50 < 4) {
                 DecoherenceSprite deco = new DecoherenceSprite(mViewWidth, y, mViewWidth + decoWidth, y + decoWidth, speed, Color.RED, decoBitmap);
                 decoArray.add(deco); // saved decoherence to array
                 deco.drawDecoherence(canvas);
             }
         }
+    }
+
+    private void clearScreen(Canvas canvas, float clearScreenStartTime) {
+        Paint p = new Paint();
+        p.setColor(Color.rgb(113, 245, 252));
+        float timeSinceClearStart = (System.nanoTime() - clearScreenStartTime)/1000000000;
+        if (timeSinceClearStart < 0.25)
+            p.setAlpha((int) (timeSinceClearStart*250));
+        if (timeSinceClearStart > 0.25)
+            p.setAlpha((int) ((0.5-timeSinceClearStart)*250));
+        canvas.drawRect(0, 0, mViewWidth, mViewHeight, p);
     }
 
     private void decoScreen(Canvas canvas, float decoScreenStartTime){
@@ -314,7 +346,7 @@ public class GameView extends SurfaceView implements Runnable{
         String superString = "";
         superString = "Superposition in " + secondsVal;
 
-        canvas.drawText(superString, (float) mViewWidth *11/16, 100, text);
+        canvas.drawText(superString, (float) mViewWidth *11/16, (float) mViewHeight/12, text);
         if (secondsVal <= 0) {
             createSuperposition = false;
             inSuperposition = true;
@@ -341,7 +373,7 @@ public class GameView extends SurfaceView implements Runnable{
             posIncrement = speed*-1;
             probTotal = 50;
             rewindBool = false;
-            mCar = new CarSprite(20, (int) superCar.top, 20+carBitmap.getWidth(), (int) superCar.bottom,0 ,0, carBitmap);
+            mCar = new CarSprite(20, (int) superCar.top, 20+carBitmap.getWidth(), (int) superCar.bottom,0 ,0, carBitmap, (double) mViewWidth/5);
             position = superCarPos;
             lastDecoPosition = position;
         }
@@ -355,7 +387,7 @@ public class GameView extends SurfaceView implements Runnable{
         measureString = "Measurement in " + secondsVal;
 
 
-        canvas.drawText(measureString, (float) mViewWidth *11/16, 100, text);
+        canvas.drawText(measureString, (float) mViewWidth *11/16, (float) mViewHeight/12, text);
 
         if (secondsVal <= 0) {
             createMeasurement = false;
@@ -365,6 +397,7 @@ public class GameView extends SurfaceView implements Runnable{
                 if (decoArray.size() > 0) {
                     decoArray.subList(0, decoArray.size()).clear();
                 }
+                clearStartTime = System.nanoTime();
             }
             else {
                 measurePos = position;
@@ -383,12 +416,6 @@ public class GameView extends SurfaceView implements Runnable{
         Canvas canvas;
         long frameStartTime;
         final int FPS = 60;
-        Paint text = new Paint();
-        text.setTextSize(55);
-        Typeface typeface = ResourcesCompat.getFont(mContext, R.font.goldman_bold);
-        text.setTypeface(typeface);
-        text.setTextAlign(Paint.Align.LEFT);
-
 
         Paint alphaPaint = new Paint();
         alphaPaint.setAlpha(60);
@@ -466,6 +493,11 @@ public class GameView extends SurfaceView implements Runnable{
                     }
                 }
 
+                // Clear Screen
+                if ((System.nanoTime() - clearStartTime)/(float)1000000000 < 0.5) {
+                    clearScreen(canvas, clearStartTime);
+                }
+
 
                 // Deco Screen
                 if ((System.nanoTime() - decoScreenStartTime)/1000000000 < decoTime && !rewindBool) {
@@ -497,7 +529,7 @@ public class GameView extends SurfaceView implements Runnable{
                 // Updating superposition
 
                 if (position - lastDecoPosition > decoWidth && !createSuperposition && !inSuperposition) {
-                    double superRand = (Math.random() * 300);
+                    double superRand = (Math.random() * 250);
                     if (superRand < 1) {
                         createSuperposition = true; // Determine whether to create superposition
                         superpositionStart = System.nanoTime();
@@ -510,7 +542,7 @@ public class GameView extends SurfaceView implements Runnable{
                 // Measurement
 
                 if (position - lastDecoPosition > decoWidth && !createMeasurement && inSuperposition) {
-                    double measureRand = (Math.random() * 500);
+                    double measureRand = (Math.random() * 400);
                     if (measureRand < 1) {
                         createMeasurement = true; // Determine whether to create superposition
                         measurementStart = System.nanoTime();
@@ -596,8 +628,16 @@ public class GameView extends SurfaceView implements Runnable{
 
                 if (inSuperposition && !end) {
                     canvas.drawText("Probability of clear: " + probTotal, (float) mViewWidth*1/32, (float) mViewHeight*15/16, text);
-                    canvas.drawText("Probability of reset to split: " + (100-probTotal), (float) mViewWidth*8/16, (float) mViewHeight*15/16, text);
+                    canvas.drawText("Probability of going back: " + (100-probTotal), (float) mViewWidth*8/16, (float) mViewHeight*15/16, text);
                 }
+
+                int timeSinceStart = (int) ((System.nanoTime() - startTime)/1000000000);
+                int seconds = timeSinceStart%60;
+                if (seconds < 10) {
+                    canvas.drawText("" + timeSinceStart/60 + ":0" + timeSinceStart%60, (float) mViewWidth*1/22, (float) mViewHeight*1/10, whiteText);
+                }
+                else
+                    canvas.drawText("" + timeSinceStart/60 + ":" + timeSinceStart%60, (float) mViewWidth*1/22, (float) mViewHeight*1/10, whiteText);
 
 
                 canvas.restore();
@@ -615,3 +655,4 @@ public class GameView extends SurfaceView implements Runnable{
         }
     }
 }
+

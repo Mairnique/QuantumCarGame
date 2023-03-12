@@ -7,16 +7,19 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 
 public class CarSprite extends RectF {
-    private static final double MAX_PIXELS_PER_SECOND = 400.0;
-    private static final double MAX_SPEED = MAX_PIXELS_PER_SECOND / GameView.MAX_UPS;
+    private double MAX_PIXELS_PER_SECOND;
+    private double MAX_SPEED;
     float dX, dY;
     Bitmap carImg;
 
-    public CarSprite(int l, int t, int r, int b, float dX, float dY, Bitmap bitmap) {
+    public CarSprite(int l, int t, int r, int b, float dX, float dY, Bitmap bitmap, double max_pixels_per_second) {
         super(l,t,r,b);
         carImg = bitmap;
         this.dX = dX;
         this.dY = dY;
+
+        MAX_PIXELS_PER_SECOND = max_pixels_per_second;
+        MAX_SPEED = MAX_PIXELS_PER_SECOND / GameView.MAX_UPS;
     }
 
     public void draw(Canvas canvas) {
